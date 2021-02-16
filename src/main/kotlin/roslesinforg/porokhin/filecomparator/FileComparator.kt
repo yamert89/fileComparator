@@ -1,23 +1,24 @@
-import java.io.BufferedReader
+package roslesinforg.porokhin.filecomparator
+
 import java.io.File
-import java.io.FileReader
-import java.io.RandomAccessFile
-import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
 
 class FileComparator(private val file1: File, private val file2: File, private val visualCapture: Int = 15, private val bufferSize: Int = 100) {
 
     fun compare(){
+        val comparedResult = mutableListOf<ComparedPair>()
         val reader = SomeFileReader(file1, file2, bufferSize)
         var block = listOf("1" to "1")
+
         while (block.isNotEmpty()){
             block = reader.readBlock()
             for (i in block.indices){
-                val first = block[i].first
-                val second = block[i].second
+                var first = block[i].first
+                var second = block[i].second
                 if (first == second) continue
+                while (first != second){
+                }
                 if (first.equalLine(second)){
-
+                    comparedResult.add(ComparedPair(first, LineType.CHANGED, second))
                 }
             }
 
@@ -33,7 +34,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
 
 
         /*val bufferBefore = ArrayBlockingQueue<String>(visualCapture)
-        val comparedResult = mutableListOf<ComparedPair>()
+        val comparedResult = mutableListOf<roslesinforg.porokhin.filecomparator.ComparedPair>()
         while (reader1.ready()){
             val s1 = reader1.readLine()
             val s2 = reader2.readLine()
@@ -42,10 +43,10 @@ class FileComparator(private val file1: File, private val file2: File, private v
                 continue
             }
             bufferBefore.forEach {
-                comparedResult.add(ComparedPair(ComparedLine(it, LineType.EQUALLY)))
+                comparedResult.add(roslesinforg.porokhin.filecomparator.ComparedPair(roslesinforg.porokhin.filecomparator.ComparedLine(it, roslesinforg.porokhin.filecomparator.LineType.EQUALLY)))
             }
-            if (s1.equalLine(s2)) comparedResult.add(ComparedPair(
-                ComparedLine(s1, LineType.CHANGED)
+            if (s1.equalLine(s2)) comparedResult.add(roslesinforg.porokhin.filecomparator.ComparedPair(
+                roslesinforg.porokhin.filecomparator.ComparedLine(s1, roslesinforg.porokhin.filecomparator.LineType.CHANGED)
             ))
 
         }*/

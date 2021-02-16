@@ -1,3 +1,5 @@
+package roslesinforg.porokhin.filecomparator
+
 class ComparedPair(private val firstLine: String, firstType: LineType, private val secondLine: String = firstLine, secondType: LineType = firstType){
     var first: ComparedLine = ComparedLine(firstLine, firstType)
         private set
@@ -23,7 +25,7 @@ class ComparedPair(private val firstLine: String, firstType: LineType, private v
 
     private fun prepare(){
         if (isPrepared) return
-        val indexes = LineComparator(firstLine, secondLine).indexes()
+        val indexes = StringComparator(firstLine, secondLine).indexes()
         first.changedIndexes.addAll(indexes.first)
         second.changedIndexes.addAll(indexes.second)
         isPrepared = true

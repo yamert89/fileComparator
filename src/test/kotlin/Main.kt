@@ -1,3 +1,5 @@
+import roslesinforg.porokhin.filecomparator.StringComparator
+
 fun main() {
     indexes()
 }
@@ -6,7 +8,7 @@ fun indexes(){
     val str1 = "abcdefghijlmnopqrstuwxyzdaa"
     val str2 = "45abcdefgh45ijklmnopqrstuwxyz"
 
-    val comparator = LineComparator(str1, str2)
+    val comparator = StringComparator(str1, str2)
 
 
     /*

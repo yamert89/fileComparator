@@ -1,6 +1,6 @@
-import java.util.*
+package roslesinforg.porokhin.filecomparator
 
-class LineComparator(private val line1: String, private val line2: String) {
+class StringComparator(private val line1: String, private val line2: String) {
     private val list1 = mutableListOf<Morpheme>().apply { fill(line1) }
     private val list2 = mutableListOf<Morpheme>().apply { fill(line2) }
 
