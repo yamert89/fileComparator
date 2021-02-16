@@ -3,25 +3,35 @@ fun main() {
 }
 
 fun indexes(){
-    val str1 = "423456"
-    val str2 = "123457"
-    println(str1.indexes(str2))
+    val str1 = "abcdefghijlmnopqrstuwxyzdaa"
+    val str2 = "45abcdefgh45ijklmnopqrstuwxyz"
+
+    val comparator = LineComparator(str1, str2)
+
+
+    /*
+    *
+    * */
+    println(comparator.indexes())
 
 }
 
 fun String.indexes(other: String): Pair<List<Pair<Int, Int>>, List<Pair<Int, Int>>>{
 
     fun compareArrays(arr1: CharArray, arr2: CharArray, list: MutableList<Pair<Int, Int>>){
+        val equalPieces = mutableListOf<String>()
         for (i in arr1.indices){
             if (i >= arr2.size) break
             if (arr1[i] == arr2[i]) continue
-            var secondValue = arr2[i]
+
+
+           /* var secondValue = arr2[i]
             var secIdx = i
             while (arr1[i] != secondValue && secIdx < arr2.size &&
                 (i < arr1.size && i < arr2.size && secIdx < arr2.size) && arr1[i + 1] != secondValue  ){
                 secondValue = arr2[secIdx++]
             }
-            if (secIdx < arr2.lastIndex) list.add(i to secIdx) else list.add(i to i)
+            if (secIdx < arr2.lastIndex) list.add(i to secIdx) else list.add(i to i)*/
         }
     }
 
