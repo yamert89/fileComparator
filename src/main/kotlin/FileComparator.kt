@@ -5,7 +5,7 @@ import java.io.RandomAccessFile
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 
-class FileComparator(private val file1: File, private val file2: File, private val visualCapture: Int = 15) {
+class FileComparator(private val file1: File, private val file2: File, private val visualCapture: Int = 15, private val bufferSize: Int = 100) {
 
     fun compare(){
         val f1 = if (file1.length() >= file2.length()) file1 else file2

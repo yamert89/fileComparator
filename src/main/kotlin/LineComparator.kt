@@ -1,8 +1,8 @@
 import java.util.*
 
 class LineComparator(private val line1: String, private val line2: String) {
-    val list1 = mutableListOf<Morpheme>().apply { fill(line1) }
-    val list2 = mutableListOf<Morpheme>().apply { fill(line2) }
+    private val list1 = mutableListOf<Morpheme>().apply { fill(line1) }
+    private val list2 = mutableListOf<Morpheme>().apply { fill(line2) }
 
     private fun MutableList<Morpheme>.fill(line: String){
         val arr = line.toCharArray()
