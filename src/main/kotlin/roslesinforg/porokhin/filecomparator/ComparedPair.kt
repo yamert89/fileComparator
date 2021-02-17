@@ -17,18 +17,20 @@ class ComparedPair(private val firstLine: String, firstType: LineType, private v
     private var isPrepared = false
 
     init {
-        when(first.type){
+        /*when(first.type){
             LineType.NEW -> second = ComparedLine.Deleted
             LineType.DELETED -> first = ComparedLine.Deleted
-        }
+        }*/
     }
 
     private fun prepare(){
         if (isPrepared) return
+        isPrepared = true
+        if (firstLine == secondLine || firstLine.isEmpty() || secondLine.isEmpty()) return
         val indexes = StringComparator(firstLine, secondLine).indexes()
         first.changedIndexes.addAll(indexes.first)
         second.changedIndexes.addAll(indexes.second)
-        isPrepared = true
+
     }
 }
 

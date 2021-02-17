@@ -1,10 +1,12 @@
 package roslesinforg.porokhin.filecomparator
 
+import org.apache.logging.log4j.LogManager
 import java.io.File
 
 class FileComparator(private val file1: File, private val file2: File, private val visualCapture: Int = 8, private val bufferSize: Int = 100) {
+    private val logger = LogManager.getLogger(FileComparator::class)
 
-    fun compare(){
+    fun compare(): MutableList<ComparedPair>{
         val comparedResult = mutableListOf<ComparedPair>()
         val reader = SomeFileReader(file1, file2, bufferSize)
         var block = listOf("1" to "1")
@@ -12,6 +14,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
 
         while (block.isNotEmpty()){
             block = reader.readBlock()
+            block.debug()
             var currentLeftIdx = 0
             var currentRightIdx = 0
             for (i in block.indices){
@@ -86,6 +89,8 @@ class FileComparator(private val file1: File, private val file2: File, private v
 
         }
 
+        return comparedResult
+
 
 
 
@@ -110,6 +115,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
             ))
 
         }*/
+
     }
 
 
@@ -154,6 +160,10 @@ class FileComparator(private val file1: File, private val file2: File, private v
         println("comparing $res %")
         return res >= 50
 
+    }
+
+    fun Any.debug(messageBefore: String = "", messageAfter: String = ""){
+        logger.debug("$messageBefore${toString()}$messageAfter")
     }
 
 

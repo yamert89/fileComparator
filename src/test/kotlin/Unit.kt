@@ -1,4 +1,10 @@
+import org.apache.logging.log4j.LogManager
+import org.junit.Assert
+import org.junit.Test
+import roslesinforg.porokhin.filecomparator.ComparedPair
 import roslesinforg.porokhin.filecomparator.FileComparator
+import roslesinforg.porokhin.filecomparator.LineType
+import roslesinforg.porokhin.filecomparator.StringComparator
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -8,6 +14,7 @@ import java.nio.ByteBuffer
 import java.nio.file.Files
 
 class Unit {
+    val logger = LogManager.getLogger(Unit::class)
 
     val input = """
         11111103.09?
@@ -84,7 +91,7 @@ class Unit {
         31.2.2.25.10.Е:
         ?
     """.trimIndent()
-
+    @Test
     fun general(){
         val file1 = Files.createTempFile("0000", "0000").toFile()
         val file2 = Files.createTempFile("0001", "0001").toFile()
@@ -98,6 +105,31 @@ class Unit {
             flush()
             close()
         }
-        val comparator = FileComparator(file1, file2)
+        val comparator = FileComparator(file1, file2, 2)
+        val list = comparator.compare()
+        logger.debug("size of list: ${list.size}")
+        logger.debug(list.toString())
+        Assert.assertEquals(3, list.size)
+        Assert.assertEquals(1, list.filter { it.second.type == LineType.CHANGED })
+
+    }
+
+    @Test
+    fun comparedPair(){
+        val pair = ComparedPair(input, LineType.EQUALLY, output, LineType.CHANGED)
+        Assert.assertEquals(2, pair.second.changedIndexes.size)
+    }
+
+    @Test
+    fun stringComparator(){
+        val input = "3.Б.2.Е КИС.КС:"
+        val output = "3.Е.2.Е КИС.КС:"
+        val comparator = StringComparator(input, output)
+        val indexes = comparator.indexes()
+        Assert.assertEquals(2, indexes.second.size)
+        Assert.assertEquals(2, indexes.first.size)
+        Assert.assertEquals(0, indexes.second[0].first)
+        Assert.assertEquals(2, indexes.second[0].second)
+
     }
 }

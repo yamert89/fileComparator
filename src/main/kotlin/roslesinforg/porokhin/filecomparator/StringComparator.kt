@@ -1,6 +1,10 @@
 package roslesinforg.porokhin.filecomparator
 
+import org.apache.logging.log4j.LogManager
+
+
 class StringComparator(private val line1: String, private val line2: String) {
+    private val logger = LogManager.getLogger(StringComparator::class)
     private val list1 = mutableListOf<Morpheme>().apply { fill(line1) }
     private val list2 = mutableListOf<Morpheme>().apply { fill(line2) }
 
@@ -15,6 +19,7 @@ class StringComparator(private val line1: String, private val line2: String) {
     }
 
     private fun compare(): MutableList<String>{
+        logger.debug("inputs: $line1 \n $line2")
         val equalPieces = mutableListOf<String>()
         var equal = ""
         var id = 0
@@ -33,7 +38,7 @@ class StringComparator(private val line1: String, private val line2: String) {
             }
 
         }
-        println(equalPieces)
+        logger.debug("equalPieces $equalPieces")
         val buffer = StringBuilder(equalPieces[0])
         val result = mutableListOf<String>()
         for (i in equalPieces.indices){
@@ -54,7 +59,7 @@ class StringComparator(private val line1: String, private val line2: String) {
 
     fun indexes(): Pair<List<Pair<Int, Int>>, List<Pair<Int, Int>>>{
         val mergedMorphemes = compare()
-        println(mergedMorphemes)
+        logger.debug("mergedMorphemes $mergedMorphemes")
         val idxs1 = mutableListOf<Pair<Int, Int>>()
         val idxs2 = mutableListOf<Pair<Int, Int>>()
         mergedMorphemes.forEach {
@@ -64,8 +69,8 @@ class StringComparator(private val line1: String, private val line2: String) {
 
         val resIdxs1 = mutableListOf<Pair<Int, Int>>()
         val resIdxs2 = mutableListOf<Pair<Int, Int>>()
-        println(idxs1)
-        println(idxs2)
+        logger.debug("idxs1: $idxs1")
+        logger.debug("idxs2: $idxs2")
 
         fun MutableList<Pair<Int, Int>>.invert(output: MutableList<Pair<Int, Int>>, lineSize: Int){
             if (this[0].first > 0) output.add(0 to this[0].first - 1)
