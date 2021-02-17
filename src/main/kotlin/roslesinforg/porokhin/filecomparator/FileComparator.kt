@@ -2,24 +2,84 @@ package roslesinforg.porokhin.filecomparator
 
 import java.io.File
 
-class FileComparator(private val file1: File, private val file2: File, private val visualCapture: Int = 15, private val bufferSize: Int = 100) {
+class FileComparator(private val file1: File, private val file2: File, private val visualCapture: Int = 8, private val bufferSize: Int = 100) {
 
     fun compare(){
         val comparedResult = mutableListOf<ComparedPair>()
         val reader = SomeFileReader(file1, file2, bufferSize)
         var block = listOf("1" to "1")
+        var newChanging = true
 
         while (block.isNotEmpty()){
             block = reader.readBlock()
+            var currentLeftIdx = 0
+            var currentRightIdx = 0
             for (i in block.indices){
-                var first = block[i].first
-                var second = block[i].second
-                if (first == second) continue
-                while (first != second){
+                var first = block[currentLeftIdx].first
+                var second = block[currentRightIdx].second
+                if (first == second) {
+                    newChanging = true
+                    currentLeftIdx++
+                    currentRightIdx++
+                    continue
                 }
-                if (first.equalLine(second)){
+                if (newChanging){
+                    val startVisualIdx = if (i < visualCapture) 0 else i - visualCapture
+                    block.subList(startVisualIdx, i - 1).forEach { comparedResult.add(ComparedPair(it.first, LineType.EQUALLY)) }
+                    newChanging = false
+                }
+
+                /*if (first.equalLine(second)){
                     comparedResult.add(ComparedPair(first, LineType.CHANGED, second))
+                    continue
+                }*/
+
+                if (i + 1 < block.size && block[i + 1].first == block[i + 1].second){
+                    comparedResult.add(ComparedPair(first, LineType.CHANGED, second))
+                    continue
                 }
+
+                var leftIdx = currentLeftIdx + 1
+                var rightIdx = currentRightIdx + 1
+                var firstEqualIdx = 0
+                var secondEqualIdx = 0
+
+                while (first != second){
+                    if (leftIdx + 1 == block.size) {
+                        firstEqualIdx = Int.MAX_VALUE 
+                        break
+                    }
+                    first = block[leftIdx++].first
+                    if (first != second) continue
+                    firstEqualIdx = leftIdx
+                    first = block[i].first
+                    break
+                }
+                while (first != second){
+                    if (rightIdx + 1 == block.size) {
+                        secondEqualIdx = Int.MAX_VALUE
+                        break
+                    }
+                    second = block[rightIdx++].second
+                    if (first != second) continue
+                    secondEqualIdx = rightIdx
+                    second = block[i].second
+                    break
+                }
+
+                when {
+                    firstEqualIdx < secondEqualIdx -> {
+                        comparedResult.add(ComparedPair(first, LineType.EQUALLY, "\n", LineType.DELETED))
+                        currentLeftIdx++
+                    }
+                    firstEqualIdx > secondEqualIdx -> {
+                        comparedResult.add(ComparedPair("\n", LineType.EQUALLY, second, LineType.NEW))
+                        currentRightIdx++
+                    }
+                    else -> throw IllegalStateException("indexes is equal")
+                }
+
+
             }
 
 
