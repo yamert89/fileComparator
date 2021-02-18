@@ -17,14 +17,16 @@ class SomeFileReader(file1: File, file2: File, private val bufferSize: Int) {
     fun readBlock(): List<Pair<String, String>>{
         val result = mutableListOf<Pair<String, String>>()
         for (i in 0..bufferSize){
+            val line1 = reader1.readLine()
+            val line2 = reader2.readLine()
             when{
-                !reader1.ready() && reader2.ready() -> result.add("" to reader2.readLine())
-                reader1.ready() && !reader2.ready() -> result.add(reader1.readLine() to "")
-                !reader1.ready() && !reader2.ready() -> {
+                line1 == null && line2 != null -> result.add("" to line2)
+                line1 != null && line2 == null -> result.add(line1 to "")
+                line1 == null && line2 == null -> {
                     close()
-                    return emptyList()
+                    return result
                 }
-                else -> result.add(reader1.readLine() to reader2.readLine())
+                else -> result.add(line1 to line2)
             }
         }
 

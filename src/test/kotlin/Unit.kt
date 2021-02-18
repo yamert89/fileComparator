@@ -1,10 +1,7 @@
 import org.apache.logging.log4j.LogManager
 import org.junit.Assert
 import org.junit.Test
-import roslesinforg.porokhin.filecomparator.ComparedPair
-import roslesinforg.porokhin.filecomparator.FileComparator
-import roslesinforg.porokhin.filecomparator.LineType
-import roslesinforg.porokhin.filecomparator.StringComparator
+import roslesinforg.porokhin.filecomparator.*
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -15,7 +12,6 @@ import java.nio.file.Files
 import javax.swing.text.ChangedCharSetException
 
 class Unit {
-    val logger = LogManager.getLogger(Unit::class)
 
     val input = """
         11111103.09?
@@ -89,11 +85,23 @@ class Unit {
         10.1.6.Б.50.17.16...90..230:
         10.1.2.ОС..18.18:
         10.1.2.Е.80.17.18:
-        31.2.2.25.10.Е:
+        31.2.1.25.10.Е:
         ?
     """.trimIndent()
     @Test
     fun general(){
+        val files = createFiles()
+        val file1 = files.first
+        val file2 = files.second
+
+        val comparator = FileComparator(file1, file2, 2)
+        val list = comparator.compare()
+        Assert.assertEquals(3, list.size)
+        Assert.assertEquals(1, list.filter { it.second.type == LineType.CHANGED })
+
+    }
+
+    private fun createFiles(): Pair<File, File>{
         val file1 = Files.createTempFile("0000", "0000").toFile()
         val file2 = Files.createTempFile("0001", "0001").toFile()
         FileOutputStream(file1).apply {
@@ -106,17 +114,21 @@ class Unit {
             flush()
             close()
         }
-        val comparator = FileComparator(file1, file2, 2)
-        val list = comparator.compare()
-        logger.debug("size of list: ${list.size}")
-        logger.debug(list.toString())
-        Assert.assertEquals(3, list.size)
-        Assert.assertEquals(1, list.filter { it.second.type == LineType.CHANGED })
+        return file1 to file2
+    }
 
+    @Test
+    fun fileReader(){
+        val files = createFiles()
+        val reader = SomeFileReader(files.first, files.second, 100)
+        val res = reader.readBlock()
+        Assert.assertEquals(input.lines().size, res.size)
     }
 
     @Test
     fun comparedPair(){
+        val input = "3.Б.2.Е КИС.КС:"
+        val output = "3.Б.3.Е КИС.Кg"
         val pair = ComparedPair(input, LineType.EQUALLY, output, LineType.CHANGED)
         Assert.assertEquals(2, pair.second.changedIndexes.size)
     }
