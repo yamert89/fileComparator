@@ -12,6 +12,7 @@ import java.io.OutputStreamWriter
 import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.file.Files
+import javax.swing.text.ChangedCharSetException
 
 class Unit {
     val logger = LogManager.getLogger(Unit::class)
@@ -122,14 +123,20 @@ class Unit {
 
     @Test
     fun stringComparator(){
-        val input = "3.Б.2.Е КИС.КС:"
-        val output = "3.Е.2.Е КИС.КС:"
-        val comparator = StringComparator(input, output)
-        val indexes = comparator.indexes()
-        Assert.assertEquals(2, indexes.second.size)
-        Assert.assertEquals(2, indexes.first.size)
-        Assert.assertEquals(0, indexes.second[0].first)
-        Assert.assertEquals(2, indexes.second[0].second)
+        var input = "3.Б.2.Е КИС.КС:"
+        var output = "3.Е.2.Е КИС.КС:"
+        stringComparatorInv(input, output, 1, 1, 0, 2)
+        input = "3.Б.2.Е КИС.КС:"
+        output = "3.Б.3.Е КИС.Кg"
+        stringComparatorInv(input, output, 2, 2, 4, 7)
+    }
 
+    private fun stringComparatorInv(input: String, changed: String, secondSize: Int, fistSize: Int, second0First: Int, second0Second: Int){
+        val comparator = StringComparator(input, changed)
+        val indexes = comparator.indexes()
+        Assert.assertEquals(secondSize, indexes.second.size)
+        Assert.assertEquals(fistSize, indexes.first.size)
+        Assert.assertEquals(second0First, indexes.second[0].first)
+        Assert.assertEquals(second0Second, indexes.second[0].second)
     }
 }

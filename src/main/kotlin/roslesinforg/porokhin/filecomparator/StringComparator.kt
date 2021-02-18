@@ -20,24 +20,27 @@ class StringComparator(private val line1: String, private val line2: String) {
 
     private fun compare(): MutableList<String>{
         logger.debug("inputs: $line1 \n $line2")
-        val equalPieces = mutableListOf<String>()
+        var equalPieces = mutableListOf<String>()
         var equal = ""
         var id = 0
         for (i in list1.indices){
             for (j in id..list2.lastIndex){
-                if (list1[i] == list2[j]) {
+                if (list1[i] == list2[j] && i != list1.lastIndex) {
                     equal = list1[i].let { "${it.prev}${it.value}${it.next}" }
-                    id = j
+                    equalPieces.add(equal)
+                    id = j + 1
                     break
                 } else {
                     if (equal.isEmpty()) continue
                     equalPieces.add(equal)
                     equal = ""
-                    id = 0
+
                 }
             }
+            id = 0
 
         }
+        equalPieces = equalPieces.toSet().toMutableList()
         logger.debug("equalPieces $equalPieces")
         val buffer = StringBuilder(equalPieces[0])
         val result = mutableListOf<String>()
@@ -45,11 +48,16 @@ class StringComparator(private val line1: String, private val line2: String) {
             if (i + 1 !in equalPieces.indices) break
             val str = equalPieces[i]
             val strNext = equalPieces[i + 1]
-            if (str.regionMatches(1, strNext, 0, 2)) {
-                buffer.append(strNext.substring(2))
-            } else {
-                result.add(buffer.toString())
-                buffer.clear()
+            when{
+                str == strNext -> {
+                    buffer.append(str)
+                    continue
+                }
+                str.regionMatches(1, strNext, 0, 2) -> buffer.append(strNext.substring(2))
+                else -> {
+                    result.add(buffer.toString())
+                    buffer.clear()
+                }
             }
 
         }
@@ -62,9 +70,11 @@ class StringComparator(private val line1: String, private val line2: String) {
         logger.debug("mergedMorphemes $mergedMorphemes")
         val idxs1 = mutableListOf<Pair<Int, Int>>()
         val idxs2 = mutableListOf<Pair<Int, Int>>()
-        mergedMorphemes.forEach {
-            idxs1.add(line1.indexOf(it) to line1.lastIndexOf(it.last()))
-            idxs2.add(line2.indexOf(it) to line2.lastIndexOf(it.last()))
+        mergedMorphemes.forEach { str ->
+            var start = line1.indexOf(str)
+            idxs1.add(start to start + str.length - 1)
+            start = line2.indexOf(str)
+            idxs2.add(start to start + str.length - 1)
         }
 
         val resIdxs1 = mutableListOf<Pair<Int, Int>>()
@@ -78,7 +88,7 @@ class StringComparator(private val line1: String, private val line2: String) {
                 if (i + 1 > this.lastIndex) break
                 output.add(this[i].second + 1 to this[i + 1].first - 1)
             }
-            if (get(lastIndex).second < lineSize) output.add(get(lastIndex).second + 1 to lineSize - 1)
+            if (get(lastIndex).second < lineSize - 1) output.add(get(lastIndex).second + 1 to lineSize - 1)
         }
 
         idxs1.invert(resIdxs1, line1.length)
