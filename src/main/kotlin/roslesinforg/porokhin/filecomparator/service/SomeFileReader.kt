@@ -1,4 +1,4 @@
-package roslesinforg.porokhin.filecomparator
+package roslesinforg.porokhin.filecomparator.service
 
 import java.io.*
 import java.nio.charset.Charset

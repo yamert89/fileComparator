@@ -1,6 +1,10 @@
 package roslesinforg.porokhin.filecomparator
 
 import org.apache.logging.log4j.LogManager
+import roslesinforg.porokhin.filecomparator.service.ComparedLine
+import roslesinforg.porokhin.filecomparator.service.ComparedPair
+import roslesinforg.porokhin.filecomparator.service.LineType
+import roslesinforg.porokhin.filecomparator.service.SomeFileReader
 import java.io.File
 import java.nio.charset.Charset
 
@@ -73,7 +77,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
 
                 when {
                     firstEqualIdx < secondEqualIdx -> {
-                        comparedResult.add(ComparedPair(first, LineType.EQUALLY, "\n", LineType.DELETED))
+                        comparedResult.add(ComparedPair(ComparedLine(first, LineType.EQUALLY), ComparedLine.Deleted))
                         currentLeftIdx++
                     }
                     firstEqualIdx > secondEqualIdx -> {
@@ -102,7 +106,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
 
 
         /*val bufferBefore = ArrayBlockingQueue<String>(visualCapture)
-        val comparedResult = mutableListOf<roslesinforg.porokhin.filecomparator.ComparedPair>()
+        val comparedResult = mutableListOf<roslesinforg.porokhin.filecomparator.service.ComparedPair>()
         while (reader1.ready()){
             val s1 = reader1.readLine()
             val s2 = reader2.readLine()
@@ -111,10 +115,10 @@ class FileComparator(private val file1: File, private val file2: File, private v
                 continue
             }
             bufferBefore.forEach {
-                comparedResult.add(roslesinforg.porokhin.filecomparator.ComparedPair(roslesinforg.porokhin.filecomparator.ComparedLine(it, roslesinforg.porokhin.filecomparator.LineType.EQUALLY)))
+                comparedResult.add(roslesinforg.porokhin.filecomparator.service.ComparedPair(roslesinforg.porokhin.filecomparator.service.ComparedLine(it, roslesinforg.porokhin.filecomparator.service.LineType.EQUALLY)))
             }
-            if (s1.equalLine(s2)) comparedResult.add(roslesinforg.porokhin.filecomparator.ComparedPair(
-                roslesinforg.porokhin.filecomparator.ComparedLine(s1, roslesinforg.porokhin.filecomparator.LineType.CHANGED)
+            if (s1.equalLine(s2)) comparedResult.add(roslesinforg.porokhin.filecomparator.service.ComparedPair(
+                roslesinforg.porokhin.filecomparator.service.ComparedLine(s1, roslesinforg.porokhin.filecomparator.service.LineType.CHANGED)
             ))
 
         }*/

@@ -1,2 +1,0 @@
-package roslesinforg.porokhin.filecomparator
-

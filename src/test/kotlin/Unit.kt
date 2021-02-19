@@ -1,16 +1,17 @@
-import org.apache.logging.log4j.LogManager
 import org.junit.Assert
 import org.junit.Test
 import roslesinforg.porokhin.filecomparator.*
+import roslesinforg.porokhin.filecomparator.service.ComparedPair
+import roslesinforg.porokhin.filecomparator.service.LineType
+import roslesinforg.porokhin.filecomparator.service.SomeFileReader
+import roslesinforg.porokhin.filecomparator.service.StringComparator
 import java.io.*
-import java.net.URI
-import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import java.nio.file.Files
-import java.nio.file.Paths
-import javax.swing.text.ChangedCharSetException
 
 class Unit {
+
+    val outPath = "C:/stringResult"
 
     val input = """
         11111103.09?
@@ -93,7 +94,7 @@ class Unit {
         val files = createFiles()
         val comparator = FileComparator(files.first, files.second)
         val stringResult = StringResult(comparator)
-        val out = File("C:/stringResult")
+        val out = File(outPath)
         val result = stringResult.get()
         FileWriter(out).apply {
             write(result)
@@ -110,7 +111,7 @@ class Unit {
         val comparator = FileComparator(file1, file2, Charset.defaultCharset(), 2)
         val list = comparator.compare()
         Assert.assertEquals(3, list.size)
-        Assert.assertEquals(1, list.filter { it.second.type == LineType.CHANGED })
+        Assert.assertEquals(2, list.filter { it.second.type == LineType.CHANGED }.size)
 
     }
 
@@ -150,18 +151,21 @@ class Unit {
     fun stringComparator(){
         var input = "3.Б.2.Е КИС.КС:"
         var output = "3.Е.2.Е КИС.КС:"
-        stringComparatorInv(input, output, 1, 1, 0, 2)
+        stringComparatorInv(input, output, 1, 1, 0, 2, 0, 2)
         input = "3.Б.2.Е КИС.КС:"
         output = "3.Б.3.Е КИС.Кg"
-        stringComparatorInv(input, output, 2, 2, 4, 7)
+        stringComparatorInv(input, output, 2, 2, 4, 7, 4, 7)
     }
 
-    private fun stringComparatorInv(input: String, changed: String, secondSize: Int, fistSize: Int, second0First: Int, second0Second: Int){
+    private fun stringComparatorInv(input: String, changed: String, secondSize: Int, fistSize: Int, first0First: Int,
+                                    first0Second: Int, second0First: Int, second0Second: Int){
         val comparator = StringComparator(input, changed)
         val indexes = comparator.indexes()
         Assert.assertEquals(secondSize, indexes.second.size)
         Assert.assertEquals(fistSize, indexes.first.size)
-        Assert.assertEquals(second0First, indexes.second[0].first)
-        Assert.assertEquals(second0Second, indexes.second[0].second)
+        Assert.assertEquals(first0First, indexes.second[0].first)
+        Assert.assertEquals(first0Second, indexes.second[0].second)
+        Assert.assertEquals(second0First, indexes.first[0].first)
+        Assert.assertEquals(second0Second, indexes.first[0].second)
     }
 }

@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.4.20"
 }
 
-group = "roslesingorg.porokhin"
+group = "roslesinforg.porokhin"
 version = "1.0"
 
 repositories {

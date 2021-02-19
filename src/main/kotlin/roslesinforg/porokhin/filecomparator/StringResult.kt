@@ -1,5 +1,7 @@
 package roslesinforg.porokhin.filecomparator
 
+import roslesinforg.porokhin.filecomparator.service.LineType
+
 class StringResult(private val comparator: FileComparator): ComparingResult<String> {
 
     override fun get(): String{
@@ -10,8 +12,6 @@ class StringResult(private val comparator: FileComparator): ComparingResult<Stri
 
               val value1 = it.first.value
               val value2 = it.second.value
-              val selected1 = mutableListOf<Char>()
-              val selected2 = mutableListOf<String>()
               append(it.first.type.toToken())
               val operated = value1.toCharArray().fill(it.first.changedIndexes)
               append(operated)

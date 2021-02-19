@@ -1,5 +1,4 @@
-import roslesinforg.porokhin.filecomparator.StringComparator
-import roslesinforg.porokhin.filecomparator.StringResult
+import roslesinforg.porokhin.filecomparator.service.StringComparator
 
 fun main() {
     indexes()

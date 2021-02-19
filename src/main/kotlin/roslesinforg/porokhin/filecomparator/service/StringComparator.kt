@@ -1,4 +1,4 @@
-package roslesinforg.porokhin.filecomparator
+package roslesinforg.porokhin.filecomparator.service
 
 import org.apache.logging.log4j.LogManager
 
