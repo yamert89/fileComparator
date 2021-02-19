@@ -1,4 +1,5 @@
 package roslesinforg.porokhin.filecomparator
 
-class ComparingResult {
+interface ComparingResult<T> {
+    fun get(): T
 }

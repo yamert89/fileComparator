@@ -2,13 +2,11 @@ import org.apache.logging.log4j.LogManager
 import org.junit.Assert
 import org.junit.Test
 import roslesinforg.porokhin.filecomparator.*
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
+import java.io.*
 import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.file.Files
+import java.nio.file.Paths
 import javax.swing.text.ChangedCharSetException
 
 class Unit {
@@ -88,8 +86,22 @@ class Unit {
         31.2.1.25.10.Е:
         ?
     """.trimIndent()
+
     @Test
-    fun general(){
+    fun stringResult(){
+        val files = createFiles()
+        val comparator = FileComparator(files.first, files.second)
+        val stringResult = StringResult(comparator)
+        val out = File("C:/stringResult")
+        val result = stringResult.get()
+        FileWriter(out).apply {
+            write(result)
+            close()
+        }
+        Assert.assertEquals(false, result.isEmpty())
+    }
+    @Test
+    fun fileComparator(){
         val files = createFiles()
         val file1 = files.first
         val file2 = files.second
@@ -102,8 +114,8 @@ class Unit {
     }
 
     private fun createFiles(): Pair<File, File>{
-        val file1 = Files.createTempFile("0000", "0000").toFile()
-        val file2 = Files.createTempFile("0001", "0001").toFile()
+        val file1 = Files.createTempFile("", "").toFile()
+        val file2 = Files.createTempFile("", "").toFile()
         FileOutputStream(file1).apply {
             write(input.toByteArray())
             flush()
@@ -114,7 +126,7 @@ class Unit {
             flush()
             close()
         }
-        return file1 to file2
+        return File(file1.path) to File(file2.path)
     }
 
     @Test

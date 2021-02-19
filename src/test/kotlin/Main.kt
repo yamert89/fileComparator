@@ -1,9 +1,13 @@
 import roslesinforg.porokhin.filecomparator.StringComparator
+import roslesinforg.porokhin.filecomparator.StringResult
 
 fun main() {
     indexes()
 }
 
+fun stringResult(){
+
+}
 fun indexes(){
     val str1 = "abcdefghijlmnopqrstuwxyzdaa"
     val str2 = "45abcdefgh45ijklmnopqrstuwxyz"

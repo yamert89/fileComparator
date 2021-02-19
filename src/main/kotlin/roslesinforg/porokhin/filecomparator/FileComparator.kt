@@ -79,7 +79,9 @@ class FileComparator(private val file1: File, private val file2: File, private v
                         comparedResult.add(ComparedPair("\n", LineType.EQUALLY, second, LineType.NEW))
                         currentRightIdx++
                     }
-                    else -> throw IllegalStateException("indexes is equal")
+                    else -> {
+                        comparedResult.add(ComparedPair(first, LineType.CHANGED, second, LineType.CHANGED))
+                    }
                 }
 
 

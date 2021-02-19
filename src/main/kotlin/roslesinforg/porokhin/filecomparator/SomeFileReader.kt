@@ -4,10 +4,14 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 
-class SomeFileReader(file1: File, file2: File, private val bufferSize: Int) {
-    private var reader1 : BufferedReader
-    private var reader2 : BufferedReader
+class SomeFileReader(private val file1: File, private val file2: File, private val bufferSize: Int) {
+    private var reader1 : BufferedReader? = null
+    private var reader2 : BufferedReader? = null
     init {
+
+    }
+
+    private fun openReaders(){
         val f1 = if (file1.length() >= file2.length()) file1 else file2
         val f2 = if (f1 == file1) file2 else file1
         reader1 = BufferedReader(FileReader(f1))
@@ -15,18 +19,27 @@ class SomeFileReader(file1: File, file2: File, private val bufferSize: Int) {
     }
 
     fun readBlock(): List<Pair<String, String>>{
+        if (reader1 == null) openReaders()
         val result = mutableListOf<Pair<String, String>>()
+        var closed1 = false
+        var closed2 = false
         for (i in 0..bufferSize){
-            val line1 = reader1.readLine()
-            val line2 = reader2.readLine()
+            val line1 = if (!closed1) reader1!!.readLine() else null
+            val line2 = if (!closed2) reader2!!.readLine() else null
             when{
-                line1 == null && line2 != null -> result.add("" to line2)
-                line1 != null && line2 == null -> result.add(line1 to "")
+                line1 == null && line2 != null -> {
+                    result.add("" to line2)
+                    closed1 = true
+                }
+                line1 != null && line2 == null -> {
+                    result.add(line1 to "")
+                    closed2 = true
+                }
                 line1 == null && line2 == null -> {
-                    close()
+                    //close()
                     return result
                 }
-                else -> result.add(line1 to line2)
+                else -> result.add(line1!! to line2!!)
             }
         }
 
@@ -34,7 +47,7 @@ class SomeFileReader(file1: File, file2: File, private val bufferSize: Int) {
     }
 
     private fun close(){
-        reader1.close()
-        reader2.close()
+        reader1!!.close()
+        reader2!!.close()
     }
 }
