@@ -5,6 +5,7 @@ import roslesinforg.porokhin.filecomparator.*
 import java.io.*
 import java.net.URI
 import java.nio.ByteBuffer
+import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
 import javax.swing.text.ChangedCharSetException
@@ -106,7 +107,7 @@ class Unit {
         val file1 = files.first
         val file2 = files.second
 
-        val comparator = FileComparator(file1, file2, 2)
+        val comparator = FileComparator(file1, file2, Charset.defaultCharset(), 2)
         val list = comparator.compare()
         Assert.assertEquals(3, list.size)
         Assert.assertEquals(1, list.filter { it.second.type == LineType.CHANGED })
@@ -116,13 +117,13 @@ class Unit {
     private fun createFiles(): Pair<File, File>{
         val file1 = Files.createTempFile("", "").toFile()
         val file2 = Files.createTempFile("", "").toFile()
-        FileOutputStream(file1).apply {
-            write(input.toByteArray())
+       OutputStreamWriter(FileOutputStream(file1), Charset.defaultCharset()).apply {
+            write(input)
             flush()
             close()
         }
-        FileOutputStream(file2).apply {
-            write(output.toByteArray())
+        OutputStreamWriter(FileOutputStream(file2), Charset.defaultCharset()).apply{
+            write(output)
             flush()
             close()
         }
@@ -132,7 +133,7 @@ class Unit {
     @Test
     fun fileReader(){
         val files = createFiles()
-        val reader = SomeFileReader(files.first, files.second, 100)
+        val reader = SomeFileReader(files.first, files.second, Charsets.UTF_8,100)
         val res = reader.readBlock()
         Assert.assertEquals(input.lines().size, res.size)
     }

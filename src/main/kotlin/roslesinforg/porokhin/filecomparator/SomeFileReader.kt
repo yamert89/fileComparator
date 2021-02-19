@@ -1,10 +1,9 @@
 package roslesinforg.porokhin.filecomparator
 
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileReader
+import java.io.*
+import java.nio.charset.Charset
 
-class SomeFileReader(private val file1: File, private val file2: File, private val bufferSize: Int) {
+class SomeFileReader(private val file1: File, private val file2: File, private val charset: Charset, private val bufferSize: Int) {
     private var reader1 : BufferedReader? = null
     private var reader2 : BufferedReader? = null
     init {
@@ -14,8 +13,9 @@ class SomeFileReader(private val file1: File, private val file2: File, private v
     private fun openReaders(){
         val f1 = if (file1.length() >= file2.length()) file1 else file2
         val f2 = if (f1 == file1) file2 else file1
-        reader1 = BufferedReader(FileReader(f1))
-        reader2 = BufferedReader(FileReader(f2))
+
+        reader1 = BufferedReader(InputStreamReader(FileInputStream(f1), charset))
+        reader2 = BufferedReader(InputStreamReader(FileInputStream(f2), charset))
     }
 
     fun readBlock(): List<Pair<String, String>>{
@@ -44,10 +44,5 @@ class SomeFileReader(private val file1: File, private val file2: File, private v
         }
 
         return result
-    }
-
-    private fun close(){
-        reader1!!.close()
-        reader2!!.close()
     }
 }

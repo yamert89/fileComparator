@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "roslesingorg.porokhin"
-version = "0.2"
+version = "1.0"
 
 repositories {
     mavenCentral()

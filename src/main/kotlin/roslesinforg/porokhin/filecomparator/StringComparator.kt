@@ -13,7 +13,7 @@ class StringComparator(private val line1: String, private val line2: String) {
         for (i in arr.indices){
             val value = if (i + 1 in arr.indices) arr[i + 1] else break
             val prev = arr[i]
-            val next = if (i + 2 in arr.indices) arr[i + 2] else Char.MIN_VALUE
+            val next = if (i + 2 in arr.indices) arr[i + 2] else null
             add(Morpheme( prev, value, next))
         }
     }
@@ -99,7 +99,7 @@ class StringComparator(private val line1: String, private val line2: String) {
 
 }
 
-class Morpheme(val prev: Char, val value: Char, val next: Char){
+class Morpheme(val prev: Char?, val value: Char, val next: Char?){
     override fun equals(other: Any?): Boolean {
         return if (other !is Morpheme) false else
             value == other.value && prev == other.prev && next == other.next
