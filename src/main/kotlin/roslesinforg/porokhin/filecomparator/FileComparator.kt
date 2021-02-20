@@ -16,9 +16,11 @@ class FileComparator(private val file1: File, private val file2: File, private v
         val reader = SomeFileReader(file1, file2, charset, bufferSize)
         var block = listOf("1" to "1")
         var newChanging = true
+        var lastChangedIdx = 0 //todo
 
-        while (block.isNotEmpty()){
+        while (true){
             block = reader.readBlock()
+            if (block.isEmpty()) break
             block.debug()
             var currentLeftIdx = 0
             var currentRightIdx = 0

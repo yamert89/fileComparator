@@ -1,10 +1,7 @@
 import org.junit.Assert
 import org.junit.Test
 import roslesinforg.porokhin.filecomparator.*
-import roslesinforg.porokhin.filecomparator.service.ComparedPair
-import roslesinforg.porokhin.filecomparator.service.LineType
-import roslesinforg.porokhin.filecomparator.service.SomeFileReader
-import roslesinforg.porokhin.filecomparator.service.StringComparator
+import roslesinforg.porokhin.filecomparator.service.*
 import java.io.*
 import java.nio.charset.Charset
 import java.nio.file.Files
@@ -90,6 +87,40 @@ class Unit {
     """.trimIndent()
 
     @Test
+    fun stress(){
+        var result = forStress(input1, outputDeleted1Line)
+        Assert.assertEquals(input1.lines().size - 1, result.size )
+        Assert.assertEquals(ComparedLine.Deleted, result[5].second)
+        result = forStress(input1, outputAdded1Line)
+        Assert.assertEquals(input1.lines().size + 1, result.size )
+        Assert.assertEquals(ComparedLine.Deleted, result.last().second)
+        result = forStress(input1, outputDeleted2Line)
+        Assert.assertEquals(input1.lines().size - 2, result.size )
+        Assert.assertEquals(ComparedLine.Deleted, result[5].second)
+        Assert.assertEquals(ComparedLine.Deleted, result[6].second)
+        result = forStress(input1, outputChanged3Line)
+        Assert.assertEquals(input1.lines().size, result.size )
+        Assert.assertEquals(LineType.CHANGED, result[4].first)
+        Assert.assertEquals(LineType.CHANGED, result[5].first)
+        Assert.assertEquals(LineType.CHANGED, result[6].first)
+        Assert.assertEquals(LineType.CHANGED, result[4].second)
+        Assert.assertEquals(LineType.CHANGED, result[5].second)
+        Assert.assertEquals(LineType.CHANGED, result[6].second)
+    }
+
+    private fun forStress(data1: String, data2: String): MutableList<ComparedPair>{
+        val files = createFiles(data1, data2)
+        val comparator = FileComparator(files.first, files.second, visualCapture = 100)
+        val stringResult = StringResult(comparator)
+        val out = File(outPath)
+        FileWriter(out).apply {
+            write(stringResult.get())
+            close()
+        }
+        return comparator.compare()
+    }
+
+    @Test
     fun stringResult(){
         val files = createFiles()
         val comparator = FileComparator(files.first, files.second)
@@ -115,16 +146,16 @@ class Unit {
 
     }
 
-    private fun createFiles(): Pair<File, File>{
+    private fun createFiles(data1: String = input, data2: String = output): Pair<File, File>{
         val file1 = Files.createTempFile("", "").toFile()
         val file2 = Files.createTempFile("", "").toFile()
        OutputStreamWriter(FileOutputStream(file1), Charset.defaultCharset()).apply {
-            write(input)
+            write(data1)
             flush()
             close()
         }
         OutputStreamWriter(FileOutputStream(file2), Charset.defaultCharset()).apply{
-            write(output)
+            write(data2)
             flush()
             close()
         }

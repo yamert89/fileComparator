@@ -30,7 +30,7 @@ class ComparedPair private constructor(){
     private fun prepare(){
         if (isPrepared) return
         isPrepared = true
-        if (first.value == second.value || first.value.isEmpty() || second.value.isEmpty()) return
+        if (first.value == second.value || first == ComparedLine.Deleted || second == ComparedLine.Deleted) return
         val indexes = StringComparator(first.value, second.value).indexes()
         first.changedIndexes.addAll(indexes.first)
         second.changedIndexes.addAll(indexes.second)
