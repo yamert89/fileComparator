@@ -9,6 +9,7 @@ class StringComparator(private val line1: String, private val line2: String) {
     private val list2 = mutableListOf<Morpheme>().apply { fill(line2) }
 
     private fun MutableList<Morpheme>.fill(line: String){
+        if (line.isEmpty()) throw IllegalArgumentException("compared string must not be empty")
         val arr = line.toCharArray()
         for (i in arr.indices){
             val value = if (i + 1 in arr.indices) arr[i + 1] else break

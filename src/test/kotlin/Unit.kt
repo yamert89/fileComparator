@@ -8,7 +8,7 @@ import java.nio.file.Files
 
 class Unit {
 
-    val outPath = "C:/stringResult"
+    val outPath = "J:/stringResult"
 
     val input = """
         11111103.09?
@@ -89,7 +89,7 @@ class Unit {
     @Test
     fun stress(){
         var result = forStress(input1, outputDeleted1Line)
-        Assert.assertEquals(input1.lines().size - 1, result.size )
+        Assert.assertEquals(6, result.size )
         Assert.assertEquals(ComparedLine.Deleted, result[5].second)
         result = forStress(input1, outputAdded1Line)
         Assert.assertEquals(input1.lines().size + 1, result.size )
@@ -99,7 +99,7 @@ class Unit {
         Assert.assertEquals(ComparedLine.Deleted, result[5].second)
         Assert.assertEquals(ComparedLine.Deleted, result[6].second)
         result = forStress(input1, outputChanged3Line)
-        Assert.assertEquals(input1.lines().size, result.size )
+        Assert.assertEquals(7, result.size )
         Assert.assertEquals(LineType.CHANGED, result[4].first)
         Assert.assertEquals(LineType.CHANGED, result[5].first)
         Assert.assertEquals(LineType.CHANGED, result[6].first)
