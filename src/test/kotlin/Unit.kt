@@ -22,30 +22,6 @@ class Unit {
         13.20.2.2:
         11.1.2.3.4.5.6.7.8:
         23.3.9.1:
-        ?
-        0.92.1.205:
-        1.2..3:
-        3.Е.4.Е ЧЕР.ЧС:
-        10.1.9.Е.120.18.20.1..60..180:
-        10.1.1.Б..19.22.3:
-        31.2.1,5.25.10.Е:
-        ?
-        0.28.1.205:
-        1.3..3..6:
-        3.Б.2.Е КИС.КС:
-        10.1.6.Б.50.17.16...90..230:
-        10.1.2.ОС..18.18:
-        10.1.2.Е.80.17.18:
-        31.2.2.25.10.Е:
-        ?
-        0.28.1.205:
-        1.4..3..45:
-        3.Б.2.Е КИС.КС:
-        10.1.6.Б.50.17.16...90..230:
-        10.1.2.ОС..18.18:
-        10.1.2.Е.80.17.18:
-        31.2.2.25.10.Е:
-        ?
     """.trimIndent()
 
     val output = """
@@ -53,37 +29,13 @@ class Unit {
         0.92.1.205:
         1.1..3:
         3.Б.2.Е КИС.КС:
-        10.1.6.Б.450.17.16...90..230:
+        10.1.8.Б.450.17.16...90..230:
         10.1.2.ОС..18.18:
         10.1.2.Е.80.17.18:
         31.2.2.25.10.Е:
         13.20.2.2:
         11.1.2.3.4.5.6.7.8:
         23.3.9.1:
-        ?
-        0.92.1.205:
-        1.2..3:
-        3.Е.4.Е ЧЕР.ЧС:
-        10.1.9.Е.120.18.20.1..60..180:
-        10.1.1.Б..19.22.3:
-        31.2.1,5.25.10.Е:
-        ?
-        0.28.1.205:
-        1.3..3..6:
-        3.Б.2.Е КИС.КС:
-        10.1.6.Б.50.17.16...90..230:
-        10.1.2.ОС..18.18:
-        10.1.2.Е.80.17.18:
-        31.2.2.25.10.Е:
-        ?
-        0.28.1.205:
-        1.4..3..45:
-        3.Б.2.Е КИС.КС:
-        10.1.6.Б.50.17.16...90..230:
-        10.1.2.ОС..18.18:
-        10.1.2.Е.80.17.18:
-        31.2.1.25.10.Е:
-        ?
     """.trimIndent()
 
     @Test
@@ -93,19 +45,19 @@ class Unit {
         Assert.assertEquals(ComparedLine.Deleted, result[5].second)
         result = forStress(input1, outputAdded1Line)
         Assert.assertEquals(input1.lines().size + 1, result.size )
-        Assert.assertEquals(ComparedLine.Deleted, result.last().second)
-        result = forStress(input1, outputDeleted2Line)
-        Assert.assertEquals(input1.lines().size - 2, result.size )
+        Assert.assertEquals(LineType.NEW, result.last().second.type)
+        result = forStress(input1, outputDeleted3Line)
+        Assert.assertEquals(8, result.size )
         Assert.assertEquals(ComparedLine.Deleted, result[5].second)
         Assert.assertEquals(ComparedLine.Deleted, result[6].second)
         result = forStress(input1, outputChanged3Line)
         Assert.assertEquals(7, result.size )
-        Assert.assertEquals(LineType.CHANGED, result[4].first)
-        Assert.assertEquals(LineType.CHANGED, result[5].first)
-        Assert.assertEquals(LineType.CHANGED, result[6].first)
-        Assert.assertEquals(LineType.CHANGED, result[4].second)
-        Assert.assertEquals(LineType.CHANGED, result[5].second)
-        Assert.assertEquals(LineType.CHANGED, result[6].second)
+        Assert.assertEquals(LineType.CHANGED, result[4].first.type)
+        Assert.assertEquals(LineType.CHANGED, result[5].first.type)
+        Assert.assertEquals(LineType.CHANGED, result[6].first.type)
+        Assert.assertEquals(LineType.CHANGED, result[4].second.type)
+        Assert.assertEquals(LineType.CHANGED, result[5].second.type)
+        Assert.assertEquals(LineType.CHANGED, result[6].second.type)
     }
 
     private fun forStress(data1: String, data2: String): MutableList<ComparedPair>{
@@ -142,7 +94,7 @@ class Unit {
         val comparator = FileComparator(file1, file2, Charset.defaultCharset(), 2)
         val list = comparator.compare()
         Assert.assertEquals(3, list.size)
-        Assert.assertEquals(2, list.filter { it.second.type == LineType.CHANGED }.size)
+        Assert.assertEquals(1, list.filter { it.second.type == LineType.CHANGED }.size)
 
     }
 

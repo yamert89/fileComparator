@@ -11,11 +11,8 @@ class SomeFileReader(private val file1: File, private val file2: File, private v
     }
 
     private fun openReaders(){
-        val f1 = if (file1.length() >= file2.length()) file1 else file2
-        val f2 = if (f1 == file1) file2 else file1
-
-        reader1 = BufferedReader(InputStreamReader(FileInputStream(f1), charset))
-        reader2 = BufferedReader(InputStreamReader(FileInputStream(f2), charset))
+        reader1 = BufferedReader(InputStreamReader(FileInputStream(file1), charset))
+        reader2 = BufferedReader(InputStreamReader(FileInputStream(file2), charset))
     }
 
     fun readBlock(): List<Pair<String, String>>{

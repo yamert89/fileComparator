@@ -1,5 +1,7 @@
 package roslesinforg.porokhin.filecomparator.service
 
+import kotlin.Exception
+
 class ComparedPair private constructor(){
     /*private var firstLine: String = ""
     private var secondLine: String = ""*/
@@ -31,10 +33,20 @@ class ComparedPair private constructor(){
         if (isPrepared) return
         isPrepared = true
         if (first.value == second.value || first == ComparedLine.Deleted || second == ComparedLine.Deleted) return
-        val indexes = StringComparator(first.value, second.value).indexes()
-        first.changedIndexes.addAll(indexes.first)
-        second.changedIndexes.addAll(indexes.second)
+        try{
+            val indexes = StringComparator(first.value, second.value).indexes()
+            first.changedIndexes.addAll(indexes.first)
+            second.changedIndexes.addAll(indexes.second)
+        }catch (e: Exception){
+            println("Exception in string comparing first = ${first.value}, second = ${second.value}")
+            e.printStackTrace()
+        }
 
+
+    }
+
+    override fun toString(): String {
+        return "$first $second"
     }
 }
 
@@ -43,6 +55,10 @@ open class ComparedLine(var value: String, val type: LineType, val changedIndexe
     object Break: ComparedLine(".......", LineType.BREAK)
     object Deleted: ComparedLine("\n", LineType.DELETED)
     object NotInitialized: ComparedLine("", LineType.EQUALLY)
+
+    override fun toString(): String {
+        return value
+    }
 }
 
 enum class LineType{

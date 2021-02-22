@@ -6,21 +6,19 @@ class StringResult(private val comparator: FileComparator): ComparingResult<Stri
 
     override fun get(): String{
         val comparedPairs = comparator.compare()
-        val maxLineLength = comparedPairs.maxOf { it.first.value.length }
+        val operatedFirstLines = comparedPairs.map { it.first.value.toCharArray().fill(it.first.changedIndexes).toString() }
+        val maxLineLength = operatedFirstLines.maxOf { it.length }
       return StringBuilder().apply {
-          comparedPairs.forEach {
-
-              val value1 = it.first.value
+          for ((index, it) in comparedPairs.withIndex()) {
+              val value1 = operatedFirstLines[index]
               val value2 = it.second.value
               append(it.first.type.toToken())
-              val operated = value1.toCharArray().fill(it.first.changedIndexes)
-              append(operated)
-              append(" ".repeat(maxLineLength - operated.length))
+              append(value1)
+              append(" ".repeat(maxLineLength - value1.length))
               append("      ")
               append(it.second.type.toToken())
               append(value2.toCharArray().fill(it.second.changedIndexes))
               append("\n")
-
           }
       }.toString()
 

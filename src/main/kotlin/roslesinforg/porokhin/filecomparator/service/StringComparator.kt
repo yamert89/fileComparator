@@ -29,7 +29,7 @@ class StringComparator(private val line1: String, private val line2: String) {
                 if (list1[i] == list2[j] && i != list1.lastIndex) {
                     equal = list1[i].let { "${it.prev}${it.value}${it.next}" }
                     equalPieces.add(equal)
-                    id = j + 1
+                    id = j + 1 //todo ?
                     break
                 } else {
                     if (equal.isEmpty()) continue
