@@ -45,19 +45,22 @@ class StringResult(private val comparator: FileComparator): ComparingResult<Stri
 
     }
 
-    private fun LineType.toToken(): String{
-        return when(this){
-            LineType.CHANGED -> "<?>"
-            LineType.DELETED -> "<->"
-            LineType.NEW -> "<+>"
-            LineType.BREAK -> "<-------------->"
-            LineType.EQUALLY -> "<=>"
-        }
-    }
 
     private fun Int.inRanges(ranges: List<Pair<Int, Int>>): Boolean{
         ranges.forEach { if (this >= it.first && this <= it.second ) return true }
         return false
+    }
+
+    companion object{
+       fun LineType.toToken(): String{
+            return when(this){
+                LineType.CHANGED -> "<?>"
+                LineType.DELETED -> "<->"
+                LineType.NEW -> "<+>"
+                LineType.BREAK -> "<-------------->"
+                LineType.EQUALLY -> "<=>"
+            }
+       }
     }
 
 }
