@@ -1,6 +1,7 @@
 package roslesinforg.porokhin.filecomparator.service
 
 import org.apache.logging.log4j.LogManager
+import kotlin.IllegalStateException
 
 
 class StringComparator(private val line1: String, private val line2: String) {
@@ -19,9 +20,10 @@ class StringComparator(private val line1: String, private val line2: String) {
         }
     }
 
-    private fun compare(): MutableList<String>{
+    private fun compare(): List<String>{
         logger.debug("inputs: $line1 \n $line2")
         var equalPieces = mutableListOf<String>()
+        if (equalPieces.isEmpty()) return emptyList()
         var equal = ""
         var id = 0
         for (i in list1.indices){
@@ -69,6 +71,7 @@ class StringComparator(private val line1: String, private val line2: String) {
     fun indexes(): Pair<List<Pair<Int, Int>>, List<Pair<Int, Int>>>{
         val mergedMorphemes = compare()
         logger.debug("mergedMorphemes $mergedMorphemes")
+        if (mergedMorphemes.isEmpty()) return listOf(0 to line1.lastIndex) to listOf(0 to line2.lastIndex)
         val idxs1 = mutableListOf<Pair<Int, Int>>()
         val idxs2 = mutableListOf<Pair<Int, Int>>()
         mergedMorphemes.forEach { str ->
@@ -95,7 +98,21 @@ class StringComparator(private val line1: String, private val line2: String) {
         idxs1.invert(resIdxs1, line1.length)
         idxs2.invert(resIdxs2, line2.length)
 
+        resIdxs1.checkValid()
+        resIdxs2.checkValid()
+
         return resIdxs1 to resIdxs2
+    }
+
+    private fun List<Pair<Int, Int>>.checkValid(){
+        forEachIndexed { index, external ->
+            forEachIndexed { intIdx, internal ->
+                if (index != intIdx) {
+                    val range = internal.first..internal.second
+                    if (external.first in range || external.second in range) throw IllegalStateException("index pair is invalid")
+                }
+            }
+        }
     }
 
 }

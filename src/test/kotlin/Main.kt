@@ -1,11 +1,23 @@
+import org.junit.Assert
 import roslesinforg.porokhin.filecomparator.service.StringComparator
 
 fun main() {
-    indexes()
+    checkIndexes()
 }
 
-fun stringResult(){
-
+fun checkIndexes(){
+    val list1 = listOf(
+        0 to 2,
+        4 to 5,
+        8 to 11
+    )
+    val list2 = listOf(
+        0 to 3,
+        2 to 6,
+        7 to 9
+    )
+    list1.checkValid()
+    list2.checkValid()
 }
 fun indexes(){
     val str1 = "abcdefghijlmnopqrstuwxyzdaa"
@@ -19,6 +31,17 @@ fun indexes(){
     * */
     println(comparator.indexes())
 
+}
+
+private fun List<Pair<Int, Int>>.checkValid(){
+    forEachIndexed { index, external ->
+        forEachIndexed { intIdx, internal ->
+            if (index != intIdx) {
+                val range = internal.first..internal.second
+                if (external.first in range || external.second in range) throw IllegalStateException("index pair is invalid")
+            }
+        }
+    }
 }
 
 fun String.indexes(other: String): Pair<List<Pair<Int, Int>>, List<Pair<Int, Int>>>{

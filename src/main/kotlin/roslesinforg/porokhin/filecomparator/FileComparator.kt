@@ -85,7 +85,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
 
                 when {
                     firstEqualIdx < secondEqualIdx -> {
-                        comparedResult.add(ComparedPair(ComparedLine(first, LineType.EQUALLY), ComparedLine.Deleted))
+                        comparedResult.add(ComparedPair(ComparedLine(first, LineType.NEW), ComparedLine.Deleted))
                         currentLeftIdx++
                     }
                     firstEqualIdx > secondEqualIdx -> {

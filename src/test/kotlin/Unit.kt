@@ -8,7 +8,7 @@ import java.nio.file.Files
 
 class Unit {
 
-    val outPath = "J:/stringResult"
+    val outPath = "D:/stringResult"
 
     val input = """
         11111103.09?
@@ -37,6 +37,7 @@ class Unit {
         11.1.2.3.4.5.6.7.8:
         23.3.9.1:
     """.trimIndent()
+
 
     @Test
     fun stress(){
@@ -71,6 +72,8 @@ class Unit {
         }
         return comparator.compare()
     }
+
+
 
     @Test
     fun stringResult(){
