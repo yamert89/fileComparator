@@ -1,11 +1,11 @@
 package roslesinforg.porokhin.filecomparator.service
 
-import org.apache.logging.log4j.LogManager
 import kotlin.IllegalStateException
+import org.apache.logging.log4j.kotlin.logger
 
 
 class StringComparator(private val line1: String, private val line2: String) {
-    private val logger = LogManager.getLogger(StringComparator::class)
+    private val logger = logger()
     private val list1 = mutableListOf<Morpheme>().apply { fill(line1) }
     private val list2 = mutableListOf<Morpheme>().apply { fill(line2) }
 

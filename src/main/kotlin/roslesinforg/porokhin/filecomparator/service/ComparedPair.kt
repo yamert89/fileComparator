@@ -1,10 +1,13 @@
 package roslesinforg.porokhin.filecomparator.service
 
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.kotlin.logger
 import kotlin.Exception
 
 open class ComparedPair private constructor(){
     /*private var firstLine: String = ""
     private var secondLine: String = ""*/
+    private val logger = logger()
     var first: ComparedLine = ComparedLine.NotInitialized
         private set
         get() {
@@ -38,8 +41,8 @@ open class ComparedPair private constructor(){
             first.changedIndexes.addAll(indexes.first)
             second.changedIndexes.addAll(indexes.second)
         }catch (e: Exception){
-            println("Exception in string comparing first = ${first.value}, second = ${second.value}")
-            e.printStackTrace()
+            logger.error("Exception in string comparing first = ${first.value}, second = ${second.value}")
+            logger.error(e)
         }
 
 

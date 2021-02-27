@@ -1,15 +1,15 @@
 package roslesinforg.porokhin.filecomparator
 
-import org.apache.logging.log4j.LogManager
 import roslesinforg.porokhin.filecomparator.service.ComparedLine
 import roslesinforg.porokhin.filecomparator.service.ComparedPair
 import roslesinforg.porokhin.filecomparator.service.LineType
 import roslesinforg.porokhin.filecomparator.service.SomeFileReader
 import java.io.File
 import java.nio.charset.Charset
+import org.apache.logging.log4j.kotlin.logger
 
 class FileComparator(private val file1: File, private val file2: File, private val charset: Charset = Charset.defaultCharset(), private val visualCapture: Int = 8, private val bufferSize: Int = 100) {
-    private val logger = LogManager.getLogger(FileComparator::class)
+     private val logger = logger()
 
     fun compare(): MutableList<ComparedPair>{
         val comparedResult = mutableListOf<ComparedPair>()
@@ -184,7 +184,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
             if (b5) bCounter++
             if (b6) bCounter++
             if (b7) bCounter++
-            println("$b1  $b2  $b3  $b4  $b5  $b6  $b7")
+            "$b1  $b2  $b3  $b4  $b5  $b6  $b7".debug()
             return bCounter
         }
 
@@ -201,7 +201,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
         }
         val s = sum.toDouble()
         val res = (s/ (run * 7)) * 100
-        println("comparing $res %")
+        res.debug()
         return res >= 50
 
     }
