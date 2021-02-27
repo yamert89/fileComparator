@@ -2,7 +2,7 @@ package roslesinforg.porokhin.filecomparator.service
 
 import kotlin.Exception
 
-class ComparedPair private constructor(){
+open class ComparedPair private constructor(){
     /*private var firstLine: String = ""
     private var secondLine: String = ""*/
     var first: ComparedLine = ComparedLine.NotInitialized
@@ -48,6 +48,9 @@ class ComparedPair private constructor(){
     override fun toString(): String {
         return "$first $second"
     }
+
+    object BreakPair: ComparedPair(ComparedLine.Break, ComparedLine.Break)
+
 }
 
 open class ComparedLine(var value: String, val type: LineType, val changedIndexes: MutableList<Pair<Int, Int>> = mutableListOf()){

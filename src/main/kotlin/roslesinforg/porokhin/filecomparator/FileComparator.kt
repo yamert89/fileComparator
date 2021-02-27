@@ -34,10 +34,14 @@ class FileComparator(private val file1: File, private val file2: File, private v
                     continue
                 }
                 if (newChanging){
-                    val startVisualIdx = when{
-                        i < visualCapture -> 0
-                        i - visualCapture > lastChangedIdx -> i - visualCapture
-                        else -> lastChangedIdx + 1
+                    val startVisualIdx: Int
+                    when{
+                        i < visualCapture -> startVisualIdx = 0
+                        i - visualCapture > lastChangedIdx -> {
+                            startVisualIdx = i - visualCapture
+                            comparedResult.add(ComparedPair.BreakPair)
+                        }
+                        else -> startVisualIdx = lastChangedIdx + 1
                     }
                     block.subList(startVisualIdx, i).forEach { comparedResult.add(ComparedPair(it.first, LineType.EQUALLY)) }
                     newChanging = false
@@ -48,7 +52,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
                     continue
                 }*/
 
-                if (i + 1 < block.size && block[i + 1].first == block[i + 1].second){
+                if (i + 1 < block.size && block[i + 1].first == block[i + 1].second || first.equalLine(second)){
                     comparedResult.add(ComparedPair(first, LineType.CHANGED, second))
                     currentLeftIdx++
                     currentRightIdx++
@@ -147,6 +151,15 @@ class FileComparator(private val file1: File, private val file2: File, private v
 
 
     private fun String.equalLine(other: String): Boolean{
+        if (this == other) return true
+        if (this.length < 3 || other.length < 3) return false
+        if (this.length < 4 || other.length < 4){
+            val firstStart = substring(0, lastIndex - 1)
+            val firstEnd = substring(1, lastIndex)
+            val secondStart = other.substring(0, lastIndex - 1)
+            val secondEnd = other.substring(1, lastIndex)
+            return firstStart == secondStart || firstStart == secondEnd || firstEnd == secondStart || firstEnd == secondEnd
+        }
 
         fun String.equalForOffset(other: String, offset: Int): Int{
             val start = substring(0, offset)
@@ -176,7 +189,12 @@ class FileComparator(private val file1: File, private val file2: File, private v
         }
 
         var run = 1
-        var sum = this.equalForOffset(other, 3)
+        val firstOffset = when(length){
+            4,5 -> 1
+            6 -> 2
+            else -> 3
+        }
+        var sum = this.equalForOffset(other, firstOffset)
         if (length > 10 && other.length > 10){
             sum += this.equalForOffset(other, 4)
             run++
