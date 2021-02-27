@@ -23,7 +23,7 @@ class StringComparator(private val line1: String, private val line2: String) {
     private fun compare(): List<String>{
         logger.debug("inputs: $line1 \n $line2")
         var equalPieces = mutableListOf<String>()
-        if (equalPieces.isEmpty()) return emptyList()
+        if (line1.isEmpty() || line2.isEmpty()) return emptyList()
         var equal = ""
         var id = 0
         for (i in list1.indices){
@@ -109,7 +109,7 @@ class StringComparator(private val line1: String, private val line2: String) {
             forEachIndexed { intIdx, internal ->
                 if (index != intIdx) {
                     val range = internal.first..internal.second
-                    if (external.first in range || external.second in range) throw IllegalStateException("index pair is invalid")
+                    if (external.first in range || external.second in range) throw IllegalStateException("index pair is invalid") //fixme first = 1.7..3..6:, second = 1.7..3.6:
                 }
             }
         }
