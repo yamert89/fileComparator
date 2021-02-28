@@ -22,16 +22,18 @@ class StringComparator(private val line1: String, private val line2: String) {
 
     private fun compare(): List<String>{
         logger.debug("inputs: $line1 | $line2")
-        val equalPieces = mutableListOf<String>()
+        val equalPieces = mutableListOf<Pair<String, Boolean>>()
         if (line1.isEmpty() || line2.isEmpty()) return emptyList()
-        var equal = ""
+
         var id = 0
         for (i in list1.indices){
+            var equal = ""
+            var mergedable = true
             for (j in id..list2.lastIndex){
                 if (list1[i] == list2[j] && i != list1.lastIndex) {
                     equal = list1[i].let { "${it.prev}${it.value}${it.next}" }
-                    equalPieces.add(equal)
-                    id = j + 1 //todo ?
+                    equalPieces.add(equal to mergedable)
+                    id = j + 1
                     break
                 } /*else {
                     if (equal.isEmpty()) continue
@@ -39,26 +41,28 @@ class StringComparator(private val line1: String, private val line2: String) {
                     equal = ""
 
                 }*/
+                mergedable = false
+
             }
             //id = 0
 
         }
         logger.debug("equalPieces $equalPieces")
-        val buffer = StringBuilder(equalPieces[0])
+        val buffer = StringBuilder(equalPieces[0].first)
         val result = mutableListOf<String>()
         for (i in equalPieces.indices){
-            val str = equalPieces[i]
+            val str = equalPieces[i].first
             if (i == equalPieces.lastIndex) {
                 buffer.append(str)
                 break
             }
-            val strNext = equalPieces[i + 1]
+            val strNext = equalPieces[i + 1].first
             when{
                 str == strNext -> {
                     buffer.append(str)
                     continue
                 }
-                str.regionMatches(1, strNext, 0, 2) -> {
+                equalPieces[i + 1].second && str.regionMatches(1, strNext, 0, 2) -> {
                     buffer.append(strNext.substring(2))
                     if (i + 1 == equalPieces.lastIndex) break
                 }
@@ -70,6 +74,9 @@ class StringComparator(private val line1: String, private val line2: String) {
 
         }
         result.add(buffer.toString())
+        result.forEach { str ->
+            if (!line1.contains(str) || !line2.contains(str)) throw IllegalStateException("Some line not contains merged morpheme")
+        }
         return result
     }
 

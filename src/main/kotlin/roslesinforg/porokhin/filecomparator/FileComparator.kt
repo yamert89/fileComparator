@@ -11,7 +11,7 @@ import org.apache.logging.log4j.kotlin.logger
 class FileComparator(private val file1: File, private val file2: File, private val charset: Charset = Charset.defaultCharset(), private val visualCapture: Int = 8, private val bufferSize: Int = 100) {
      private val logger = logger()
 
-    fun compare(): MutableList<ComparedPair>{
+    fun compare(): MutableList<ComparedPair>{  //fixme - duplicates line in result
         val comparedResult = mutableListOf<ComparedPair>()
         val reader = SomeFileReader(file1, file2, charset, bufferSize)
         var block = listOf("1" to "1")
