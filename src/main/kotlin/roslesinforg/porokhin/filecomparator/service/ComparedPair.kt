@@ -58,7 +58,7 @@ open class ComparedPair private constructor(){
 
 open class ComparedLine(var value: String, val type: LineType, val changedIndexes: MutableList<Pair<Int, Int>> = mutableListOf()){
 
-    object Break: ComparedLine(".......", LineType.BREAK)
+    object Break: ComparedLine("", LineType.BREAK)
     object Deleted: ComparedLine("\n", LineType.DELETED)
     object NotInitialized: ComparedLine("", LineType.EQUALLY)
 
