@@ -21,7 +21,6 @@ class FileComparator(private val file1: File, private val file2: File, private v
         while (true){
             block = reader.readBlock()
             if (block.isEmpty()) break
-            block.debug()
             var currentLeftIdx = 0
             var currentRightIdx = 0
             for (i in block.indices){
@@ -115,36 +114,9 @@ class FileComparator(private val file1: File, private val file2: File, private v
 
             }
 
-
-
         }
 
         return comparedResult
-
-
-
-
-
-
-
-
-        /*val bufferBefore = ArrayBlockingQueue<String>(visualCapture)
-        val comparedResult = mutableListOf<roslesinforg.porokhin.filecomparator.service.ComparedPair>()
-        while (reader1.ready()){
-            val s1 = reader1.readLine()
-            val s2 = reader2.readLine()
-            if (s1 == s2) {
-                bufferBefore.add(s1)
-                continue
-            }
-            bufferBefore.forEach {
-                comparedResult.add(roslesinforg.porokhin.filecomparator.service.ComparedPair(roslesinforg.porokhin.filecomparator.service.ComparedLine(it, roslesinforg.porokhin.filecomparator.service.LineType.EQUALLY)))
-            }
-            if (s1.equalLine(s2)) comparedResult.add(roslesinforg.porokhin.filecomparator.service.ComparedPair(
-                roslesinforg.porokhin.filecomparator.service.ComparedLine(s1, roslesinforg.porokhin.filecomparator.service.LineType.CHANGED)
-            ))
-
-        }*/
 
     }
 

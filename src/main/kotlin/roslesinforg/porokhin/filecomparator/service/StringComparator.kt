@@ -21,8 +21,8 @@ class StringComparator(private val line1: String, private val line2: String) {
     }
 
     private fun compare(): List<String>{
-        logger.debug("inputs: $line1 \n $line2")
-        var equalPieces = mutableListOf<String>()
+        logger.debug("inputs: $line1 | $line2")
+        val equalPieces = mutableListOf<String>()
         if (line1.isEmpty() || line2.isEmpty()) return emptyList()
         var equal = ""
         var id = 0
@@ -33,31 +33,36 @@ class StringComparator(private val line1: String, private val line2: String) {
                     equalPieces.add(equal)
                     id = j + 1 //todo ?
                     break
-                } else {
+                } /*else {
                     if (equal.isEmpty()) continue
                     equalPieces.add(equal)
                     equal = ""
 
-                }
+                }*/
             }
-            id = 0
+            //id = 0
 
         }
-        equalPieces = equalPieces.toSet().toMutableList()
         logger.debug("equalPieces $equalPieces")
         val buffer = StringBuilder(equalPieces[0])
         val result = mutableListOf<String>()
         for (i in equalPieces.indices){
-            if (i + 1 !in equalPieces.indices) break
             val str = equalPieces[i]
+            if (i == equalPieces.lastIndex) {
+                buffer.append(str)
+                break
+            }
             val strNext = equalPieces[i + 1]
             when{
                 str == strNext -> {
                     buffer.append(str)
                     continue
                 }
-                str.regionMatches(1, strNext, 0, 2) -> buffer.append(strNext.substring(2))
-                else -> {
+                str.regionMatches(1, strNext, 0, 2) -> {
+                    buffer.append(strNext.substring(2))
+                    if (i + 1 == equalPieces.lastIndex) break
+                }
+                else -> if (buffer.isNotEmpty()) {
                     result.add(buffer.toString())
                     buffer.clear()
                 }
@@ -90,7 +95,10 @@ class StringComparator(private val line1: String, private val line2: String) {
             if (this[0].first > 0) output.add(0 to this[0].first - 1)
             for (i in this.indices){
                 if (i + 1 > this.lastIndex) break
-                output.add(this[i].second + 1 to this[i + 1].first - 1)
+                val start = this[i].second + 1
+                var end = this[i + 1].first - 1
+                if (end < start) end = start
+                output.add( start to end)
             }
             if (get(lastIndex).second < lineSize - 1) output.add(get(lastIndex).second + 1 to lineSize - 1)
         }
@@ -100,6 +108,8 @@ class StringComparator(private val line1: String, private val line2: String) {
 
         resIdxs1.checkValid()
         resIdxs2.checkValid()
+
+        logger.debug("indexes for lines $line1 | $line2 : $resIdxs1 | $resIdxs2")
 
         return resIdxs1 to resIdxs2
     }
@@ -121,5 +131,9 @@ class Morpheme(val prev: Char?, val value: Char, val next: Char?){
     override fun equals(other: Any?): Boolean {
         return if (other !is Morpheme) false else
             value == other.value && prev == other.prev && next == other.next
+    }
+
+    override fun toString(): String {
+        return "$prev | $value | $next"
     }
 }
