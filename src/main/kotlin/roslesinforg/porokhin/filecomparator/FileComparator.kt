@@ -128,8 +128,8 @@ class FileComparator(private val file1: File, private val file2: File, private v
         if (this.length < 4 || other.length < 4){
             val firstStart = substring(0, lastIndex - 1)
             val firstEnd = substring(1, lastIndex)
-            val secondStart = other.substring(0, lastIndex - 1)
-            val secondEnd = other.substring(1, lastIndex)
+            val secondStart = other.substring(0, other.lastIndex - 1)
+            val secondEnd = other.substring(1, other.lastIndex)
             return firstStart == secondStart || firstStart == secondEnd || firstEnd == secondStart || firstEnd == secondEnd
         }
 
