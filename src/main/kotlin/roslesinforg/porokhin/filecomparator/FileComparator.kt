@@ -9,17 +9,20 @@ import java.nio.charset.Charset
 import org.apache.logging.log4j.kotlin.logger
 
 class FileComparator(private val file1: File, private val file2: File, private val charset: Charset = Charset.defaultCharset(), private val visualCapture: Int = 8, private val bufferSize: Int = 100) {
-     private val logger = logger()
+    private val logger = logger()
+    private var counter = 0
 
     fun compare(): MutableList<ComparedPair>{  //fixme - duplicates line in result
         val comparedResult = mutableListOf<ComparedPair>()
         val reader = SomeFileReader(file1, file2, charset, bufferSize)
         var block = listOf("1" to "1")
         var newChanging = true
-        var lastChangedIdx = 0 //todo
-
         while (true){
             block = reader.readBlock()
+            if (block.isEmpty()) break
+            var lastChangedIdx = 0 //todo
+            counter += block.size
+            logger.debug("$counter lines has been read, last = ${block.last()}")
             if (block.isEmpty()) break
             var currentLeftIdx = 0
             var currentRightIdx = 0

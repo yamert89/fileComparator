@@ -34,12 +34,14 @@ class SomeFileReader(private val file1: File, private val file2: File, private v
                 }
                 line1 == null && line2 == null -> {
                     //close()
-                    return result
+                    return emptyList()
                 }
-                else -> result.add(line1!! to line2!!)
+                else -> result.add(line1!!.prepare() to line2!!.prepare())
             }
         }
 
         return result
     }
+
+    private fun String.prepare() = this.replace(".,", ".0,")
 }
