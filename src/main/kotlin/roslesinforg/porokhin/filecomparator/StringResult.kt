@@ -57,7 +57,7 @@ class StringResult(private val comparator: FileComparator): ComparingResult<Stri
                 LineType.CHANGED -> "<?>"
                 LineType.DELETED -> "<->"
                 LineType.NEW -> "<+>"
-                LineType.BREAK -> "<-------------->"
+                LineType.BREAK -> "---"
                 LineType.EQUALLY -> "<=>"
             }
        }
