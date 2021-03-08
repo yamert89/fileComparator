@@ -20,13 +20,14 @@ class FileComparator(private val file1: File, private val file2: File, private v
         while (true){
             block = reader.readBlock()
             if (block.isEmpty()) break
-            var lastChangedIdx = 0 //todo
-            counter += block.size
+            var lastChangedIdx = 0
+
             logger.debug("$counter lines has been read, last = ${block.last()}")
             if (block.isEmpty()) break
             var currentLeftIdx = 0
             var currentRightIdx = 0
             for (i in block.indices){
+                val lineNumber = counter + i + 1
                 var first = block[currentLeftIdx].first
                 var second = block[currentRightIdx].second
                 if (first == second) {
@@ -37,15 +38,27 @@ class FileComparator(private val file1: File, private val file2: File, private v
                 }
                 if (newChanging){
                     val startVisualIdx: Int
+                    var lNum: Int
                     when{
-                        i < visualCapture -> startVisualIdx = 0
+                        i < visualCapture -> {
+                            startVisualIdx = 0
+                            lNum = 1 + counter
+                        }
                         i - visualCapture > lastChangedIdx -> {
                             startVisualIdx = i - visualCapture
+                            lNum = startVisualIdx + counter + 1
                             comparedResult.add(ComparedPair.BreakPair)
                         }
-                        else -> startVisualIdx = lastChangedIdx + 1
+                        else -> {
+                            comparedResult.add(ComparedPair.BreakPair)
+                            startVisualIdx = lastChangedIdx + 1
+                            lNum = startVisualIdx + 1 + counter
+                        }
                     }
-                    block.subList(startVisualIdx, i).forEach { comparedResult.add(ComparedPair(it.first, LineType.EQUALLY)) }
+
+                    block.subList(startVisualIdx, i).forEach {
+                        comparedResult.add(ComparedPair(lNum++, it.first, LineType.EQUALLY))
+                    }
                     newChanging = false
                 }
 
@@ -55,7 +68,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
                 }*/
 
                 if (i + 1 < block.size && block[i + 1].first == block[i + 1].second || first.equalLine(second)){
-                    comparedResult.add(ComparedPair(first, LineType.CHANGED, second))
+                    comparedResult.add(ComparedPair(lineNumber, first, LineType.CHANGED, second))
                     currentLeftIdx++
                     currentRightIdx++
                     continue
@@ -91,31 +104,32 @@ class FileComparator(private val file1: File, private val file2: File, private v
 
                 when {
                     firstEqualIdx < secondEqualIdx -> {
-                        comparedResult.add(ComparedPair(ComparedLine(first, LineType.NEW), ComparedLine.Deleted))
+                        comparedResult.add(ComparedPair(lineNumber, ComparedLine(first, LineType.NEW), ComparedLine.Deleted))
                         currentLeftIdx++
                     }
                     firstEqualIdx > secondEqualIdx -> {
-                        comparedResult.add(ComparedPair(ComparedLine.Deleted, ComparedLine(second, LineType.NEW)))
+                        comparedResult.add(ComparedPair(lineNumber, ComparedLine.Deleted, ComparedLine(second, LineType.NEW)))
                         currentRightIdx++
                     }
                     firstEqualIdx == secondEqualIdx && secondEqualIdx == Int.MAX_VALUE -> {
                         when {
-                            first.isEmpty() -> comparedResult.add(ComparedPair(ComparedLine.Deleted,
+                            first.isEmpty() -> comparedResult.add(ComparedPair(lineNumber, ComparedLine.Deleted,
                                 ComparedLine(second, LineType.NEW)))
-                            second.isEmpty() -> comparedResult.add(ComparedPair(ComparedLine(first, LineType.NEW) ,ComparedLine.Deleted))
-                            else -> comparedResult.add(ComparedPair(first, LineType.CHANGED, second, LineType.CHANGED))
+                            second.isEmpty() -> comparedResult.add(ComparedPair(lineNumber, ComparedLine(first, LineType.NEW) ,ComparedLine.Deleted))
+                            else -> comparedResult.add(ComparedPair(lineNumber, first, LineType.CHANGED, second, LineType.CHANGED))
                         }
                         currentLeftIdx++
                         currentRightIdx++
                     }
                     else -> {
-                        comparedResult.add(ComparedPair(first, LineType.CHANGED, second, LineType.CHANGED))
+                        comparedResult.add(ComparedPair(lineNumber, first, LineType.CHANGED, second, LineType.CHANGED))
                     }
                 }
                 lastChangedIdx = i
 
 
             }
+            counter += block.size
 
         }
 

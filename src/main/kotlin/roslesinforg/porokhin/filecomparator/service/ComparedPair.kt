@@ -21,13 +21,16 @@ open class ComparedPair private constructor(){
             prepare()
             return field
         }
+    var lineNumber: Int? = null
     private var isPrepared = false
 
-    constructor(firstLine: String, firstType: LineType, secondLine: String = firstLine, secondType: LineType = firstType): this(){
+    constructor(lineNumb: Int, firstLine: String, firstType: LineType, secondLine: String = firstLine, secondType: LineType = firstType): this(){
+        lineNumber = lineNumb
         first = ComparedLine(firstLine, firstType)
         second = ComparedLine(secondLine, secondType)
     }
-    constructor(firstLine: ComparedLine, secondLine: ComparedLine): this(){
+    constructor(lineNumb: Int, firstLine: ComparedLine, secondLine: ComparedLine): this(){
+        lineNumber = lineNumb
         first = firstLine
         second = secondLine
     }
@@ -52,7 +55,7 @@ open class ComparedPair private constructor(){
         return "$first $second"
     }
 
-    object BreakPair: ComparedPair(ComparedLine.Break, ComparedLine.Break)
+    object BreakPair: ComparedPair(-1, ComparedLine.Break, ComparedLine.Break)
 
 }
 
