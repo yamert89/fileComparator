@@ -15,19 +15,34 @@ class FileComparator(private val file1: File, private val file2: File, private v
     fun compare(): MutableList<ComparedPair>{  //fixme - duplicates line in result
         val comparedResult = mutableListOf<ComparedPair>()
         val reader = SomeFileReader(file1, file2, charset, bufferSize)
-        var block = listOf("1" to "1")
+        var block = mutableListOf("1" to "1")
         var newChanging = true
-        while (true){
-            block = reader.readBlock()
-            if (block.isEmpty()) break
-            var lastChangedIdx = 0
+        var currentLeftIdx = 0
+        var currentRightIdx = 0
 
+        while (true){
+            val newBlock = reader.readBlock()
+            if (newBlock.isEmpty()) break
+            block.addAll(newBlock)
+            var lastChangedIdx = 0
+            if (currentLeftIdx > currentRightIdx) {
+                currentLeftIdx -= currentRightIdx
+                currentRightIdx = 0
+            } else if (currentLeftIdx < currentRightIdx){
+                currentRightIdx -= currentLeftIdx
+                currentLeftIdx = 0
+            }
             logger.debug("$counter lines has been read, last = ${block.last()}")
             if (block.isEmpty()) break
-            var currentLeftIdx = 0
-            var currentRightIdx = 0
-            for (i in block.indices){
-                val lineNumber = counter + i + 1
+
+            while (true){
+                val lineNumber = 0/*counter + i + 1*/ //todo
+                val minCurrentIdx = minOf(currentLeftIdx, currentRightIdx)
+                if (currentLeftIdx >= block.lastIndex || currentRightIdx >= block.lastIndex) {
+                    block = block.subList(minCurrentIdx, block.lastIndex)
+                    break
+                }
+
                 var first = block[currentLeftIdx].first
                 var second = block[currentRightIdx].second
                 if (first == second) {
@@ -36,16 +51,17 @@ class FileComparator(private val file1: File, private val file2: File, private v
                     currentRightIdx++
                     continue
                 }
+
                 if (newChanging){
                     val startVisualIdx: Int
                     var lNum: Int
                     when{
-                        i < visualCapture -> {
+                        minCurrentIdx < visualCapture -> {
                             startVisualIdx = 0
                             lNum = 1 + counter
                         }
-                        i - visualCapture > lastChangedIdx -> {
-                            startVisualIdx = i - visualCapture
+                        minCurrentIdx - visualCapture > lastChangedIdx -> {
+                            startVisualIdx = minCurrentIdx - visualCapture
                             lNum = startVisualIdx + counter + 1
                             comparedResult.add(ComparedPair.BreakPair)
                         }
@@ -56,7 +72,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
                         }
                     }
 
-                    block.subList(startVisualIdx, i).forEach {
+                    block.subList(startVisualIdx, minCurrentIdx).forEach {
                         comparedResult.add(ComparedPair(lNum++, it.first, LineType.EQUALLY))
                     }
                     newChanging = false
@@ -67,7 +83,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
                     continue
                 }*/
 
-                if (i + 1 < block.size && block[i + 1].first == block[i + 1].second || first.equalLine(second)){
+                if (block[currentLeftIdx + 1].first == block[currentRightIdx + 1].second/* || first.equalLine(second)*/){ //fixme false positives
                     comparedResult.add(ComparedPair(lineNumber, first, LineType.CHANGED, second))
                     currentLeftIdx++
                     currentRightIdx++
@@ -89,7 +105,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
                     firstEqualIdx = leftIdx
                     break
                 }
-                first = block[i].first
+                first = block[currentLeftIdx].first
                 while (first != second){
                     if (rightIdx == block.size) {
                         secondEqualIdx = Int.MAX_VALUE
@@ -100,16 +116,20 @@ class FileComparator(private val file1: File, private val file2: File, private v
                     secondEqualIdx = rightIdx
                     break
                 }
-                second = block[i].second
+                second = block[currentRightIdx].second
 
                 when {
                     firstEqualIdx < secondEqualIdx -> {
-                        comparedResult.add(ComparedPair(lineNumber, ComparedLine(first, LineType.NEW), ComparedLine.Deleted))
-                        currentLeftIdx++
+                        for (j in 0..firstEqualIdx - currentLeftIdx - 2){
+                            comparedResult.add(ComparedPair(lineNumber, ComparedLine(block[j + currentLeftIdx].first, LineType.NEW), ComparedLine.Deleted))
+                        }
+                        currentLeftIdx = firstEqualIdx - 1
                     }
                     firstEqualIdx > secondEqualIdx -> {
-                        comparedResult.add(ComparedPair(lineNumber, ComparedLine.Deleted, ComparedLine(second, LineType.NEW)))
-                        currentRightIdx++
+                        for (j in 0..secondEqualIdx - currentRightIdx - 2){
+                            comparedResult.add(ComparedPair(lineNumber, ComparedLine.Deleted, ComparedLine(block[j + currentRightIdx].second, LineType.NEW)))
+                        }
+                        currentRightIdx = secondEqualIdx - 1
                     }
                     firstEqualIdx == secondEqualIdx && secondEqualIdx == Int.MAX_VALUE -> {
                         when {
@@ -125,7 +145,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
                         comparedResult.add(ComparedPair(lineNumber, first, LineType.CHANGED, second, LineType.CHANGED))
                     }
                 }
-                lastChangedIdx = i
+                lastChangedIdx = minCurrentIdx
 
 
             }

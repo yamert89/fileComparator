@@ -52,7 +52,7 @@ open class ComparedPair private constructor(){
     }
 
     override fun toString(): String {
-        return "$first $second"
+        return "$first | $second"
     }
 
     object BreakPair: ComparedPair(-1, ComparedLine.Break, ComparedLine.Break)
