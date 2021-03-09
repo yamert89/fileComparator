@@ -27,10 +27,10 @@ class FileComparator(private val file1: File, private val file2: File, private v
             var lastChangedIdx = 0
             if (currentLeftIdx > currentRightIdx) {
                 currentLeftIdx -= currentRightIdx
-                currentRightIdx = 0
+                currentRightIdx = 1
             } else if (currentLeftIdx < currentRightIdx){
                 currentRightIdx -= currentLeftIdx
-                currentLeftIdx = 0
+                currentLeftIdx = 1
             }
             logger.debug("$counter lines has been read, last = ${block.last()}")
             if (block.isEmpty()) break
@@ -39,7 +39,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
                 val lineNumber = 0/*counter + i + 1*/ //todo
                 val minCurrentIdx = minOf(currentLeftIdx, currentRightIdx)
                 if (currentLeftIdx >= block.lastIndex || currentRightIdx >= block.lastIndex) {
-                    block = block.subList(minCurrentIdx, block.lastIndex)
+                    block = if (currentLeftIdx != currentRightIdx) block.subList(minCurrentIdx, block.lastIndex) else mutableListOf()
                     break
                 }
 
