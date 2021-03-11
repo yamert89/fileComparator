@@ -66,7 +66,7 @@ open class ComparedLine(var value: String, val type: LineType, val changedIndexe
     object NotInitialized: ComparedLine("", LineType.EQUALLY)
 
     override fun toString(): String {
-        return value
+        return "$value - $type"
     }
 }
 
