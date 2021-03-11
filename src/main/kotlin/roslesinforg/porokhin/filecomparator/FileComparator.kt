@@ -70,7 +70,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
                             lNum = lineNumber - (minCurrentIdx - startVisualIdx)
                         }
                         minCurrentIdx - visualCapture > lastChangedIdx -> {
-                            startVisualIdx = minCurrentIdx - visualCapture
+                            startVisualIdx = currentLeftIdx - visualCapture
                             lNum = lineNumber - (minCurrentIdx - startVisualIdx)
                             comparedResult.add(ComparedPair.BreakPair)
                         }
@@ -82,7 +82,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
                     }
                         //lNum = lineNumber - (minCurrentIdx - startVisualIdx)
 
-                    block.subList(startVisualIdx, minCurrentIdx).forEach {
+                    block.subList(startVisualIdx, currentLeftIdx).forEach {
                         comparedResult.add(ComparedPair(lNum++, it.first, LineType.EQUALLY))
                         //lastChangedIdx ++
                     }
