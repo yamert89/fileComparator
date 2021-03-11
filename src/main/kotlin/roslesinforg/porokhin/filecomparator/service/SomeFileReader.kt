@@ -21,7 +21,7 @@ class SomeFileReader(private val file1: File, private val file2: File, private v
         var closed1 = false
         var closed2 = false
         for (i in 0..bufferSize){
-            val line1 = if (!closed1) reader1!!.readLine() else null //fixme skipping lines
+            val line1 = if (!closed1) reader1!!.readLine() else null
             val line2 = if (!closed2) reader2!!.readLine() else null
             when{
                 line1 == null && line2 != null -> {
