@@ -12,7 +12,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
     private val logger = logger()
     private var counter = 0
 
-    fun compare(): MutableList<ComparedPair>{  //fixme - duplicates line in result
+    fun compare(): MutableList<ComparedPair>{  //fixme - kv 1 vid 8 -> 8b1oc1e bug
         val comparedResult = mutableListOf<ComparedPair>()
         val reader = SomeFileReader(file1, file2, charset, bufferSize)
         var block = mutableListOf("1" to "1")
