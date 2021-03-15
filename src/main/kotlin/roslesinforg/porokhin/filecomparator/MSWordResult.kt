@@ -21,7 +21,14 @@ class MSWordResult(
     override fun get(): XWPFDocument {
         val doc = XWPFDocument()
         val head = doc.createHeader(HeaderFooterType.FIRST)
-        if (title.isNotEmpty()) doc.createParagraph().createRun().setText(title)
+        if (title.isNotEmpty()) doc.createParagraph().apply {
+            spacingBeforeLines = 1
+            spacingAfterLines = 1
+            createRun().apply {
+                fontSize = 15
+                setText(title)
+            }
+        }
 
         val table = doc.createTable(lines.size + 1, 5)
         table.setCellMargins(30, 140, 30, 140)
