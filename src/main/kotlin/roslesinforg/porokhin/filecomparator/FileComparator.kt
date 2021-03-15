@@ -96,9 +96,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
                 }*/
 
                 if (currentLeftIdx + 2 <= block.lastIndex && currentRightIdx + 2 <= block.lastIndex &&
-                        block[currentLeftIdx + 1].first == block[currentRightIdx + 1].second &&
-                        block[currentLeftIdx + 2].first == block[currentRightIdx + 2].second &&
-                        first.equalLine(second)
+                    first.equalLine(second) &&  block[currentLeftIdx + 1].first.equalLine(block[currentRightIdx + 1].second) //todo unreliable checking
                 ){
                     comparedResult.add(ComparedPair(lineNumber, first, LineType.CHANGED, second))
                     currentLeftIdx++
@@ -184,7 +182,7 @@ class FileComparator(private val file1: File, private val file2: File, private v
 
 
 
-    private fun String.equalLine(other: String): Boolean{
+    private fun String.equalLine(other: String): Boolean{ //todo to refine the algorithm
         if (this == other) return true
         if (this.length < 3 || other.length < 3) return false
         if (this.length < 4 || other.length < 4){
