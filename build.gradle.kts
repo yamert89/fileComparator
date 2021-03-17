@@ -5,10 +5,6 @@ plugins {
 group = "roslesinforg.porokhin"
 version = "1.0"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.apache.logging.log4j:log4j-api:2.14.0")
