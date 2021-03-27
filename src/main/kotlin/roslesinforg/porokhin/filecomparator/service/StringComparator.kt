@@ -58,10 +58,10 @@ class StringComparator(private val line1: String, private val line2: String) {
             }
             val strNext = equalPieces[i + 1].first
             when{
-                str == strNext -> {
+                /*str == strNext -> {
                     buffer.append(str)
                     continue
-                }
+                }*/
                 equalPieces[i + 1].second && str.regionMatches(1, strNext, 0, 2) -> {
                     buffer.append(strNext.substring(2))
                     if (i + 1 == equalPieces.lastIndex) break
