@@ -11,11 +11,11 @@ interface ComparingResult<T> {
     companion object{
         fun LineType.toToken(): String{
             return when(this){
-                LineType.CHANGED -> "<?>"
-                LineType.DELETED -> "<->"
-                LineType.NEW -> "<+>"
+                LineType.CHANGED -> "?"
+                LineType.DELETED -> "-"
+                LineType.NEW -> "+"
                 LineType.BREAK -> "---"
-                LineType.EQUALLY -> "<=>"
+                LineType.EQUALLY -> "="
             }
         }
     }
