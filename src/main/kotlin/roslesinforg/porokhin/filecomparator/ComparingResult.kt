@@ -16,6 +16,8 @@ interface ComparingResult<T> {
                 LineType.NEW -> "+"
                 LineType.BREAK -> "---"
                 LineType.EQUALLY -> "="
+                LineType.LIFTED -> "↑"
+                LineType.DROPPED -> "↓"
             }
         }
     }

@@ -174,15 +174,19 @@ class FileComparator(private val file1: File, private val file2: File, private v
     }
 
     fun compare1(): MutableList<ComparedPair>{
+        var needBreak = false
         val comparedResult = mutableListOf<ComparedPair>()
         val reader = SomeFileReader(file1, file2, charset, bufferSize)
-        var currentLeftBlockIdx = 0
-        var currentRightBlockIdx = 0
+
         var lineNumber = 0
         while (true){
             val blocks = reader.readBlock1()
-            val firstBlock = blocks.first[currentLeftBlockIdx]
-            val secondBlock = blocks.second[currentRightBlockIdx]
+            var currentLeftBlockIdx = 0
+            var currentRightBlockIdx = 0
+            logger.debug("Block first size: ${blocks.first.size}")
+            val fBlocks = blocks.first
+            val sBlocks = blocks.second
+            if (fBlocks.isEmpty() && sBlocks.isEmpty()) break
 
             fun operateTwoEqualBlocks(firstBlock: Block, secondBlock: Block){
                 var currentFirstLineIdx = 0
@@ -246,44 +250,112 @@ class FileComparator(private val file1: File, private val file2: File, private v
                                 second.isEmpty() -> comparedResult.add(ComparedPair(lineNumber++, ComparedLine(first, LineType.NEW) ,ComparedLine.Deleted))
                                 else -> comparedResult.add(ComparedPair(lineNumber++, first, LineType.CHANGED, second, LineType.CHANGED))
                             }
-                            currentLeftBlockIdx++
-                            currentRightBlockIdx++
+                            currentFirstLineIdx++
+                            currentSecondLineIdx++
                         }
                         else -> {
                             comparedResult.add(ComparedPair(lineNumber++, first, LineType.CHANGED, second, LineType.CHANGED))
                         }
                     }
                 }
+                currentLeftBlockIdx++
+                currentRightBlockIdx++
             }
+            var droppedBlock: Block? = null
+            var liftedBlock: Block? = null
+            for (i in fBlocks.indices){
+                val firstBlock = fBlocks[currentLeftBlockIdx]
+                val secondBlock = sBlocks[currentRightBlockIdx]
 
 
-            if (firstBlock == secondBlock){ operateTwoEqualBlocks(firstBlock, secondBlock)
-            } else{
-                val firstEqualBlockIdx = blocks.second.indexOf(blocks.second.find { it == firstBlock })
-                val secondEqualBlockIdx = blocks.first.indexOf(blocks.first.find { it == secondBlock })
-                when{
-                    firstEqualBlockIdx > secondEqualBlockIdx -> {
-                        val lines = blocks.first[firstEqualBlockIdx].lines
-                        for (i in 0..lines.size){
-                            comparedResult.add(ComparedPair(lineNumber++, ComparedLine(lines[i], LineType.NEW), ComparedLine.Deleted))
-                        }
-                        currentLeftBlockIdx = firstEqualBlockIdx + 1
+                if (firstBlock == secondBlock){
+                    if (firstBlock.deepEquals(secondBlock)) {
+                        currentLeftBlockIdx++
+                        currentRightBlockIdx++
+                        needBreak = true
+                        continue
                     }
-                    firstEqualBlockIdx < secondEqualBlockIdx -> {
-                        val lines = blocks.second[secondEqualBlockIdx].lines
-                        for (i in 0..lines.size){
-                            comparedResult.add(ComparedPair(lineNumber++, ComparedLine.Deleted, ComparedLine(lines[i], LineType.NEW)))
-                        }
-                        currentRightBlockIdx = secondEqualBlockIdx + 1
+                    if (needBreak) {
+                        comparedResult.add(ComparedPair.BreakPair)
+                        needBreak = false
                     }
-                    else -> throw IllegalStateException("firstEqualBlockIdx = $firstEqualBlockIdx | secondEqualBlockIdx = $secondEqualBlockIdx")
+                    operateTwoEqualBlocks(firstBlock, secondBlock)
+                } else{
+                    if (needBreak) {
+                        comparedResult.add(ComparedPair.BreakPair)
+                        needBreak = false
+                    }
+
+                    val fEq = fBlocks.find { it == secondBlock }
+                    val sEq = sBlocks.find { it == firstBlock }
+                    val firstEqualBlockIdx = if (fEq == null) -1 else fBlocks.indexOf(fEq)
+                    val secondEqualBlockIdx = if (sEq == null) -1 else sBlocks.indexOf(sEq)
+                    when{//todo add -1 or > 0 variants
+                        secondBlock == droppedBlock -> {
+                            val lines = secondBlock.lines
+                            for (j in lines.indices){
+                                comparedResult.add(ComparedPair(0, ComparedLine.Lifted, ComparedLine(lines[j], LineType.NEW)))
+                            }
+                            droppedBlock = null
+                            currentRightBlockIdx++
+                        }
+                        firstBlock == liftedBlock -> {
+                            val lines = firstBlock.lines
+                            for (j in lines.indices){
+                                comparedResult.add(ComparedPair(0, ComparedLine(lines[j], LineType.EQUALLY), ComparedLine.Lifted))
+                            }
+                            liftedBlock = null
+                            currentLeftBlockIdx++
+                        }
+                        firstEqualBlockIdx > 0 && secondEqualBlockIdx == -1 -> {
+                            val lines = firstBlock.lines
+                            for (j in lines.indices){
+                                comparedResult.add(ComparedPair(lineNumber++, ComparedLine(lines[j], LineType.NEW), ComparedLine.Deleted))
+                            }
+                            currentLeftBlockIdx++
+                        }
+                        secondEqualBlockIdx > 0 && firstEqualBlockIdx == -1 || firstBlock.isEmpty()-> {
+                            val lines = secondBlock.lines
+                            for (j in lines.indices){
+                                comparedResult.add(ComparedPair(lineNumber++, ComparedLine.Deleted, ComparedLine(lines[j], LineType.NEW)))
+                            }
+                            currentRightBlockIdx++
+                        }
+                        firstEqualBlockIdx > secondEqualBlockIdx -> {
+                            val lines = secondBlock.lines
+                            for (j in lines.indices){
+                                comparedResult.add(ComparedPair(0, ComparedLine.Lifted, ComparedLine(lines[j], LineType.NEW)))
+                            }
+                            liftedBlock = secondBlock
+                            currentRightBlockIdx++
+                        }
+                        secondEqualBlockIdx > firstEqualBlockIdx -> {
+                            val lines = firstBlock.lines
+                            for (j in lines.indices){
+                                comparedResult.add(ComparedPair(0, ComparedLine(lines[j], LineType.EQUALLY), ComparedLine.Dropped))
+                            }
+                            droppedBlock = firstBlock
+                            currentLeftBlockIdx++
+                        }
+
+                        /*firstEqualBlockIdx == secondEqualBlockIdx -> {
+
+                        }*/
+                        else -> throw IllegalStateException("firstEqualBlockIdx = $firstEqualBlockIdx | secondEqualBlockIdx = $secondEqualBlockIdx")
+                    }
                 }
+
             }
+
 
         }
 
+        return comparedResult
+
 
     }
+
+   // private fun MutableList<String>.fillComparedPairs()
 
 
 

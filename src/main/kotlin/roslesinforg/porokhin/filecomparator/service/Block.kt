@@ -1,28 +1,41 @@
 package roslesinforg.porokhin.filecomparator.service
 
-open class Block(val lines: MutableList<String> = mutableListOf()) {
+import org.apache.logging.log4j.kotlin.logger
+import kotlin.math.log
 
-    fun isEmpty() = this == EmptyBlock
+open class Block(val lines: MutableList<String> = mutableListOf()){
+    private val logger = logger()
 
-    override operator fun equals(other: Any?): Boolean{
-        if (other !is Block) return false
-        val kv1 = getKv()
-        val vid1 = other.getVid()
-        val kv2 = getKv()
-        val vid2 = other.getVid()
-        if (kv1 == kv2 && vid1 == vid2) return true
+    fun isEmpty() = this === EmptyBlock
+    fun isDeepEmpty()= lines.isEmpty()
+
+    fun deepEquals(other: Block) = lines.containsAll(other.lines) && other.lines.containsAll(lines)
+
+    override fun equals(other: Any?): Boolean{
+        try {
+            if (this === other) return true
+            if (other !is Block) return false
+            if (this.isEmpty() && !other.isEmpty() || !isEmpty() && other.isEmpty()) return false
+            val kv1 = lines.find { it.match0() }!!.getKv()
+            val vid1 = lines.find { it.match1() }!!.getVid()
+            val kv2 = other.lines.find { it.match0() }!!.getKv()
+            val vid2 = other.lines.find { it.match1() }!!.getVid()
+            if (kv1 == kv2 && vid1 == vid2) return true
+        }catch (e: Exception){
+            logger.error(e)
+            logger.error("Attempt equal \n 1 block: \n ${this.lines.joinToString("\n")} \n " +
+                    "and 2 block: \n ${(other as Block).lines.joinToString("\n")}")
+        }
+
         return false
     }
 
-    private fun getKv(): String{
-        val regex1 = "(0\\.)(\\d{2})(\\..+)".toRegex()
-        val m0 = lines.find { it.matches(regex1) }!!
-        return regex1.matchEntire(m0)!!.groups[1]!!.value
+    override fun toString(): String {
+        return "${lines[0]} | ${lines[1]}"
     }
-    private fun getVid(): String{
-        val regex2 = "(1\\.)(\\d{1,3})(\\..+)".toRegex()
-        val m1 = lines.find { it.matches(regex2) }!!
-        return regex2.matchEntire(m1)!!.groups[1]!!.value
-    }
+
+
 }
+
 object EmptyBlock: Block()
+

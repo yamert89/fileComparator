@@ -63,6 +63,8 @@ open class ComparedLine(var value: String, val type: LineType, val changedIndexe
 
     object Break: ComparedLine(".....разрыв.....", LineType.BREAK)
     object Deleted: ComparedLine("\n", LineType.DELETED)
+    object Lifted: ComparedLine("", LineType.LIFTED)
+    object Dropped: ComparedLine("", LineType.DROPPED)
     object NotInitialized: ComparedLine("", LineType.EQUALLY)
 
     override fun toString(): String {
@@ -75,5 +77,7 @@ enum class LineType{
     NEW,
     DELETED,
     EQUALLY,
+    LIFTED,
+    DROPPED,
     BREAK
 }

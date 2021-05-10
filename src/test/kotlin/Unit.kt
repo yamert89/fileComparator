@@ -154,4 +154,12 @@ class Unit {
         Assert.assertEquals(second0First, indexes.first[0].first)
         Assert.assertEquals(second0Second, indexes.first[0].second)
     }
+
+    @Test
+    fun regExp(){
+        val zero = "0.92.144.205:"
+        val m1 = "1.1..3..25:"
+        Assert.assertEquals(144, zero.getKv().toInt())
+        Assert.assertEquals(1, m1.getVid().toInt())
+    }
 }
