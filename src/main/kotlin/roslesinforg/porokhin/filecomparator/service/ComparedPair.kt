@@ -38,7 +38,9 @@ open class ComparedPair private constructor(){
     private fun prepare(){
         if (isPrepared) return
         isPrepared = true
-        if (first.value == second.value || first == ComparedLine.Deleted || second == ComparedLine.Deleted) return
+        if (first.value == second.value || first == ComparedLine.Deleted
+            || second == ComparedLine.Deleted || first == ComparedLine.Dropped || first == ComparedLine.Lifted
+            || second == ComparedLine.Dropped || second == ComparedLine.Lifted) return
         try{
             val indexes = StringComparator(first.value, second.value).indexes()
             first.changedIndexes.addAll(indexes.first)
