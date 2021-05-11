@@ -21,6 +21,7 @@ open class ComparedPair private constructor(){
             prepare()
             return field
         }
+    @Deprecated("this field currently not released")
     var lineNumber: Int? = null
     private var isPrepared = false
 

@@ -16,10 +16,10 @@ open class Block(val lines: MutableList<String> = mutableListOf()){
             if (this === other) return true
             if (other !is Block) return false
             if (this.isEmpty() && !other.isEmpty() || !isEmpty() && other.isEmpty()) return false
-            val kv1 = lines.find { it.match0() }!!.getKv()
-            val vid1 = lines.find { it.match1() }!!.getVid()
-            val kv2 = other.lines.find { it.match0() }!!.getKv()
-            val vid2 = other.lines.find { it.match1() }!!.getVid()
+            val kv1 = getKv()
+            val vid1 = getVid()
+            val kv2 = other.getKv()
+            val vid2 = other.getVid()
             if (kv1 == kv2 && vid1 == vid2) return true
         }catch (e: Exception){
             logger.error(e)
@@ -29,6 +29,10 @@ open class Block(val lines: MutableList<String> = mutableListOf()){
 
         return false
     }
+
+    fun getKv() = lines.find { it.match0() }!!.getKv()
+
+    fun getVid() = lines.find { it.match1() }!!.getVid()
 
     override fun toString(): String {
         return "${lines[0]} | ${lines[1]}"
