@@ -62,7 +62,10 @@ open class ComparedPair private constructor(){
 
 }
 
-open class ComparedLine(var value: String, val type: LineType, val changedIndexes: MutableList<Pair<Int, Int>> = mutableListOf()){
+open class ComparedLine(value: String, val type: LineType, val changedIndexes: MutableList<Pair<Int, Int>> = mutableListOf()){
+    var shadow: Boolean = false
+    var value : String = value
+        get() = if (shadow) "" else field
 
     object Break: ComparedLine(".....разрыв.....", LineType.BREAK)
     object Deleted: ComparedLine("\n", LineType.DELETED)

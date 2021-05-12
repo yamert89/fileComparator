@@ -4,7 +4,6 @@ import java.io.File
 import java.nio.charset.Charset
 import org.apache.logging.log4j.kotlin.logger
 import roslesinforg.porokhin.filecomparator.service.*
-import sun.plugin.javascript.navig.Link
 
 class FileComparator(private val file1: File, private val file2: File, private val charset: Charset = Charset.defaultCharset()) {
     private val logger = logger()
@@ -24,14 +23,15 @@ class FileComparator(private val file1: File, private val file2: File, private v
             val sBlocks = blocks.second
             if (fBlocks.isEmpty() && sBlocks.isEmpty()) break
 
-            fun operateTwoEqualBlocks(firstBlock: Block, secondBlock: Block){
+            fun MutableList<ComparedPair>.addTwoEqualBlocks(firstBlock: Block, secondBlock: Block, runInTheEnd: (MutableList<ComparedPair>) -> Unit = {}){
+                val tempResult = mutableListOf<ComparedPair>()
                 var currentFirstLineIdx = 0
                 var currentSecondLineIdx = 0
                 while (currentFirstLineIdx < firstBlock.lines.size && currentSecondLineIdx < secondBlock.lines.size){
                     var first = firstBlock.lines[currentFirstLineIdx]
                     var second = secondBlock.lines[currentSecondLineIdx]
                     if (first == second){
-                        comparedResult.add(ComparedPair(lineNumber, first, LineType.EQUALLY, second))
+                        tempResult.add(ComparedPair(lineNumber, first, LineType.EQUALLY, second))
                         currentFirstLineIdx++
                         currentSecondLineIdx++
                         continue
@@ -68,72 +68,90 @@ class FileComparator(private val file1: File, private val file2: File, private v
                     when {
                         firstEqualIdx < secondEqualIdx -> {
                             for (j in 0..firstEqualIdx - currentFirstLineIdx - 2){
-                                comparedResult.add(ComparedPair(lineNumber++, ComparedLine(firstBlock.lines[j + currentFirstLineIdx], LineType.NEW), ComparedLine.Deleted))
+                                tempResult.add(ComparedPair(lineNumber++, ComparedLine(firstBlock.lines[j + currentFirstLineIdx], LineType.NEW), ComparedLine.Deleted))
                             }
                             currentFirstLineIdx = firstEqualIdx - 1
                         }
                         firstEqualIdx > secondEqualIdx -> {
                             for (j in 0..secondEqualIdx - currentSecondLineIdx - 2){
-                                comparedResult.add(ComparedPair(lineNumber++, ComparedLine.Deleted, ComparedLine(secondBlock.lines[j + currentSecondLineIdx], LineType.NEW)))
+                                tempResult.add(ComparedPair(lineNumber++, ComparedLine.Deleted, ComparedLine(secondBlock.lines[j + currentSecondLineIdx], LineType.NEW)))
                             }
                             currentSecondLineIdx = secondEqualIdx - 1
                         }
                         firstEqualIdx == secondEqualIdx && secondEqualIdx == Int.MAX_VALUE -> {
                             when {
-                                first.isEmpty() -> comparedResult.add(ComparedPair(lineNumber++, ComparedLine.Deleted,
+                                first.isEmpty() -> tempResult.add(ComparedPair(lineNumber++, ComparedLine.Deleted,
                                     ComparedLine(second, LineType.NEW)))
-                                second.isEmpty() -> comparedResult.add(ComparedPair(lineNumber++, ComparedLine(first, LineType.NEW) ,ComparedLine.Deleted))
-                                else -> comparedResult.add(ComparedPair(lineNumber++, first, LineType.CHANGED, second, LineType.CHANGED))
+                                second.isEmpty() -> tempResult.add(ComparedPair(lineNumber++, ComparedLine(first, LineType.NEW) ,ComparedLine.Deleted))
+                                else -> tempResult.add(ComparedPair(lineNumber++, first, LineType.CHANGED, second, LineType.CHANGED))
                             }
                             currentFirstLineIdx++
                             currentSecondLineIdx++
                         }
                         else -> {
-                            comparedResult.add(ComparedPair(lineNumber++, first, LineType.CHANGED, second, LineType.CHANGED))
+                            tempResult.add(ComparedPair(lineNumber++, first, LineType.CHANGED, second, LineType.CHANGED))
                         }
                     }
                 }
                 currentLeftBlockIdx++
                 currentRightBlockIdx++
+                runInTheEnd(tempResult)
+                comparedResult.addAll(tempResult)
             }
             var droppedBlock: Block? = null
             var liftedBlock: Block? = null
+
+            var bufferBefore: Block = EmptyBlock
+            var needAfter = false
+
+            fun  MutableList<String>.fillComparedResult(firstLine: ComparedLine? = null, secondLine: ComparedLine? = null,
+                                                        type: LineType = secondLine?.type ?: LineType.CHANGED){
+                val builder: (Int) -> ComparedPair = when{
+                    firstLine == null && secondLine == null -> {idx -> ComparedPair(0, ComparedLine(get(idx), LineType.EQUALLY), ComparedLine(get(idx), LineType.EQUALLY)) }
+                    firstLine == null -> {idx -> ComparedPair(0, ComparedLine(get(idx), LineType.EQUALLY), secondLine!!)}
+                    secondLine == null -> {idx -> ComparedPair(0, firstLine, ComparedLine(get(idx), type)) }
+                    else -> throw IllegalStateException("Unknown state")
+                }
+                for (j in indices) comparedResult.add(builder(j))
+            }
+            
             while (currentLeftBlockIdx in fBlocks.indices){
                 val firstBlock = fBlocks[currentLeftBlockIdx]
                 val secondBlock = sBlocks[currentRightBlockIdx]
 
+                fun breakOrNot(){
+                    if (needBreak) {
+                        comparedResult.add(ComparedPair.BreakPair)
+                        needBreak = false
+                    }
+                }
+
+                fun beforeNeighbourOrNot(){
+                    if (needBreak){
+                        comparedResult.add(ComparedPair.BreakPair)
+                        bufferBefore.lines.fillComparedResult()
+                        bufferBefore = EmptyBlock
+                        needBreak = false
+                    }
+                }
 
                 if (firstBlock == secondBlock){
                     if (firstBlock.deepEquals(secondBlock)) {
                         currentLeftBlockIdx++
                         currentRightBlockIdx++
                         needBreak = true
+                        bufferBefore = firstBlock
+                        if (needAfter) {
+                            if (!bufferBefore.deepEquals(firstBlock)) firstBlock.lines.fillComparedResult()
+                            needAfter = false
+                        }
                         continue
                     }
-                    if (needBreak) {
-                        comparedResult.add(ComparedPair.BreakPair)
-                        needBreak = false
-                    }
-                    operateTwoEqualBlocks(firstBlock, secondBlock)
+                    breakOrNot()
+                    comparedResult.addTwoEqualBlocks(firstBlock, secondBlock)
                 } else{
-
-                    fun  MutableList<String>.fillComparedResult(firstLine: ComparedLine? = null, secondLine: ComparedLine? = null,
-                                                                type: LineType = secondLine?.type ?: LineType.CHANGED){
-                        val builder: (Int) -> ComparedPair = when{
-                            firstLine == null && secondLine == null -> throw IllegalArgumentException("first and second arguments can not be null")
-                            firstLine == null -> {idx -> ComparedPair(0, ComparedLine(get(idx), LineType.EQUALLY), secondLine!!)}
-                            secondLine == null -> {idx -> ComparedPair(0, firstLine, ComparedLine(get(idx), type)) }
-                            else -> throw IllegalStateException("Unknown state")
-                        }
-
-                        for (j in indices) comparedResult.add(builder(j))
-
-                    }
-
-                    if (needBreak) {
-                        comparedResult.add(ComparedPair.BreakPair)
-                        needBreak = false
-                    }
+                    needAfter = true
+                    beforeNeighbourOrNot()
 
                     val fEq = fBlocks.find { it == secondBlock }
                     val sEq = sBlocks.find { it == firstBlock }
@@ -146,7 +164,12 @@ class FileComparator(private val file1: File, private val file2: File, private v
                                   this check needs for case when input sorting incorrect (may by in future)
                             }*/
                             firstBlock.lines.fillComparedResult(secondLine = ComparedLine.Dropped)
-                            secondBlock.lines.fillComparedResult(ComparedLine.Lifted, type = LineType.NEW)
+                            secondBlock.lines.fillComparedResult(ComparedLine.Lifted, type = LineType.LIFTED)
+                            if(fEq != null && !firstBlock.deepEquals(sEq!!)){
+                                comparedResult.addTwoEqualBlocks(firstBlock, sEq){result ->
+                                    result.forEach { it.first.shadow = true }
+                                }
+                            } else sEq!!.lines.fillComparedResult(ComparedLine.Lifted, type = LineType.NEW)
                             currentLeftBlockIdx += 2
                             currentRightBlockIdx += 2
                             continue
